@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import Link from 'next/link';
 import Calendar from '@/components/shared/Calendar'; 
+import Poll from '@/components/shared/Poll';
 
 export default function Home() {
   return (
@@ -35,6 +36,11 @@ export default function Home() {
           <Calendar />
         </div>
       </section>
+
+      <div className="container mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-6">Active Polls </h1>
+      <Poll />
+    </div>
     </>
   );
 }
