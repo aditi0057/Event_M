@@ -20,8 +20,8 @@ const Calendar = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center mt-16 py-14 bg-white ">
-      <div className="calendar max-w-8xl w-full  bg-white py-10 px-8 -mt-14 mb-12 border-black shadow-lg rounded-lg overflow-hidden">
+    <div className="flex flex-col items-center justify-center mt-14 py-14 bg-white ">
+      <div className="calendar max-w-6xl   bg-white py-10 px-8 -mt-14  border-black shadow-lg rounded-lg overflow-hidden">
         <div className="calendar-header bg-gray-200 py-10 px-8 flex items-center justify-between ">
           <h2 className="text-3xl font-bold text-gray-800">Imp Dates</h2>
           <div className="flex gap-4">
@@ -60,11 +60,11 @@ const Calendar = () => {
           </div>
         </div>
 
-        <div className="calendar-grid grid grid-cols-7 gap-5 m-2 mt-10">
+        <div className="calendar-grid grid grid-cols-7 gap-5 mt-7 m-4">
           {events.map((event) => (
             <div
               key={event.date}
-              className={`day bg-gray-200 rounded-md p-6 ${
+              className={`day bg-gray-200 rounded-md p-6 w-40 ${
                 event.type === 'birthday'
                   ? 'bg-yellow-200'
                   : event.type === 'anniversary'
@@ -74,8 +74,8 @@ const Calendar = () => {
                   : ''
               }`}
             >
-              <div className="font-semibold text-xl mb-6">{event.title}</div>
-              <div className="text-lg text-gray-600">{event.date}</div>
+              <div className="font-semibold  text-xl mb-6">{event.title}</div>
+              <div className="text-lg  px-19 text-gray-600">{event.date}</div>
             </div>
           ))}
         </div>
