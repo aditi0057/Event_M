@@ -4,11 +4,12 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Calendar from '@/components/shared/Calendar'; 
 import Poll from '@/components/shared/Poll';
+import Gallery from '@/components/shared/Gallery';
 
 export default function Home() {
   return (
     <>
-      <section className="bg-primary-50 bg-dotted-pattern bg-contain py-5 md:py-10">
+      <section className="bg-white bg-dotted-pattern bg-contain py-5 md:py-10">
         <div className="wrapper grid grid-cols-1 gap-5 md:grid-cols-2 2xl:gap-0">
           <div className="flex flex-col justify-center gap-8">
             <h1 className="h2-bold">Collaborate, Create, and Celebrate<br></br>All in One Place!</h1>
@@ -21,7 +22,7 @@ export default function Home() {
           </div>
 
           <Image 
-            src="/assets/images/hero.png"
+            src="/assets/images/hero.avif"
             alt="hero"
             width={1000}
             height={1000}
@@ -41,6 +42,7 @@ export default function Home() {
       <h1 className="text-3xl font-bold mb-6">Active Polls </h1>
       <Poll />
     </div>
+      <Gallery/>
     </>
   );
 }
