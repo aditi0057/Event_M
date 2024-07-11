@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Calendar from '@/components/shared/Calendar'; 
 import Poll from '@/components/shared/Poll';
+import Gallery from '@/components/shared/Gallery';
 
 export default function Home() {
   return (
@@ -21,7 +22,7 @@ export default function Home() {
           </div>
 
           <Image 
-            src="/assets/images/hero.jpg"
+            src="/assets/images/hero.avif"
             alt="hero"
             width={1000}
             height={1000}
@@ -41,6 +42,7 @@ export default function Home() {
       <h1 className="text-3xl font-bold mb-6">Active Polls </h1>
       <Poll />
     </div>
+      <Gallery/>
     </>
   );
 }
