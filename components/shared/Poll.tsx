@@ -26,11 +26,9 @@ const PollPage: React.FC = () => {
     const votedPollsObj = votedPolls ? JSON.parse(votedPolls) : {};
 
     if (votedPollsObj[pollIndex] !== undefined && votedPollsObj[pollIndex] !== optionIndex) {
-      // User changes their vote
       currentVotes[votedPollsObj[pollIndex]]--;
       currentVotes[optionIndex]++;
     } else if (votedPollsObj[pollIndex] === undefined) {
-      // User votes for the first time
       currentVotes[optionIndex]++;
     }
 

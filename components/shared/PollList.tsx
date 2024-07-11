@@ -1,4 +1,4 @@
-// components/PollList.tsx
+
 import { useEffect, useState } from 'react';
 
 interface Poll {

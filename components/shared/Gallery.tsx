@@ -55,7 +55,6 @@ const events: Event[] = [
       '/assets/images/event2/img3.avif',
     ],
   },
-  // Add more events here
 ];
 
 const Gallery: React.FC = () => {
@@ -71,7 +70,7 @@ const Gallery: React.FC = () => {
               <li key={index}>
                 <button
                   onClick={() => setSelectedEvent(event)}
-                  className="block w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                  className="block w-full bg-primary-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
                 >
                   {event.date}
                 </button>
