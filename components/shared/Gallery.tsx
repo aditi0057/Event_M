@@ -25,6 +25,36 @@ const events: Event[] = [
       '/assets/images/event2/img3.avif',
     ],
   },
+  {
+    date: '2024-07-03',
+    images: [
+      '/assets/images/event1/img1.avif',
+      '/assets/images/event1/img2.avif',
+      '/assets/images/event1/img3.avif',
+      '/assets/images/event2/img1.avif',
+    ],
+  },
+  {
+    date: '2024-07-04',
+    images: [
+      '/assets/images/event2/img1.avif',
+      '/assets/images/event2/img2.avif',
+      '/assets/images/event2/img3.avif',
+      '/assets/images/event1/img3.avif',
+      '/assets/images/event2/img1.avif',
+    ],
+  },
+  {
+    date: '2024-07-05',
+    images: [
+      '/assets/images/event1/img1.avif',
+      '/assets/images/event1/img2.avif',
+      '/assets/images/event1/img3.avif',
+      '/assets/images/event2/img1.avif',
+      '/assets/images/event2/img2.avif',
+      '/assets/images/event2/img3.avif',
+    ],
+  },
   // Add more events here
 ];
 
