@@ -5,19 +5,19 @@ export const headerLinks = [
     },
     {
       label: 'Events',
-      route: '/events/create',
+      route: '/Events',
     },
     {
       label: 'Calendar',
-      route: '/calendar',
+      route: '/Calendar',
     },
     {
       label: 'Polls',
-      route: '/polls',
+      route: '/Poll',
     },
     {
       label: 'Gallery',
-      route: '/gallery',
+      route: '/Gallery',
     },
   ]
   

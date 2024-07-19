@@ -2,9 +2,7 @@
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import Link from 'next/link';
-import Calendar from '@/components/shared/Calendar'; 
-import Poll from '@/components/shared/Poll';
-import Gallery from '@/components/shared/Gallery';
+
 
 export default function Home() {
   return (
@@ -15,7 +13,7 @@ export default function Home() {
             <h1 className="h2-bold">Collaborate, Create, and Celebrate<br></br>All in One Place!</h1>
             <p className="p-regular-20 md:p-regular-20">Effortlessly design and organize events, collaborate and make decisions as a team, track progress, and ensure a smooth event day</p>
             <Button size="lg" asChild className="button w-full sm:w-fit">
-              <Link href="#events">
+              <Link href="/Events">
                 Explore Now
               </Link>
             </Button>
@@ -31,18 +29,6 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="events" className="py-10">
-        <div className="wrapper">
-          <h2 className="h3-bold mb-8">My Calendar</h2>
-          <Calendar />
-        </div>
-      </section>
-
-      <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">Active Polls </h1>
-      <Poll />
-    </div>
-      <Gallery/>
     </>
   );
 }
