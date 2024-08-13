@@ -55,53 +55,170 @@
 // };
 
 // export default PollPage;
+// 'use client';
+// import { useState } from 'react';
+
+// const PollManager = () => {
+//   const [polls, setPolls] = useState([{ question: '', options: ['', ''], votes: [0, 0] }]);
+
+//   const handleChange = (e, pollIndex, optionIndex) => {
+//     const newPolls = [...polls];
+//     newPolls[pollIndex].options[optionIndex] = e.target.value;
+//     setPolls(newPolls);
+//   };
+
+//   const handleVote = (pollIndex, optionIndex) => {
+//     const newPolls = [...polls];
+//     newPolls[pollIndex].votes[optionIndex] += 1;
+//     setPolls(newPolls);
+//   };
+
+//   const handleQuestionChange = (e, pollIndex) => {
+//     const newPolls = [...polls];
+//     newPolls[pollIndex].question = e.target.value;
+//     setPolls(newPolls);
+//   };
+
+//   const addOption = (pollIndex) => {
+//     const newPolls = [...polls];
+//     newPolls[pollIndex].options.push('');
+//     newPolls[pollIndex].votes.push(0);
+//     setPolls(newPolls);
+//   };
+
+//   const addPoll = () => {
+//     setPolls([...polls, { question: '', options: ['', ''], votes: [0, 0] }]);
+//   };
+
+//   return (
+//     <div className="relative min-h-screen bg-white bg-dotted-pattern bg-contain py-8">
+//       <h1 className="text-3xl font-bold text-center text-purple-500 mb-8">Event Planner Polls</h1>
+//       <div className="max-w-2xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg">
+//         <h1 className="text-2xl font-bold mb-4">Create Your Polls</h1>
+//         {polls.map((poll, pollIndex) => (
+//           <div key={pollIndex} className="mb-8">
+//             <input
+//               type="text"
+//               placeholder="Enter your poll question"
+//               value={poll.question}
+//               onChange={(e) => handleQuestionChange(e, pollIndex)}
+//               className="w-full p-2 mb-4 border border-gray-300 rounded"
+//             />
+//             {poll.options.map((option, optionIndex) => (
+//               <div key={optionIndex} className="flex items-center mb-2">
+//                 <input
+//                   type="text"
+//                   placeholder={`Option ${optionIndex + 1}`}
+//                   value={option}
+//                   onChange={(e) => handleChange(e, pollIndex, optionIndex)}
+//                   className="w-full p-2 border border-gray-300 rounded"
+//                 />
+//               </div>
+//             ))}
+//             <button
+//               className="w-full py-2 mt-4 text-white bg-purple-500 rounded hover:bg-purple-600"
+//               onClick={() => addOption(pollIndex)}
+//             >
+//               Add Option
+//             </button>
+//             <div className="mt-6">
+//               <h2 className="text-xl font-semibold mb-2">{poll.question}</h2>
+//               {poll.options.map((option, optionIndex) => (
+//                 <div key={optionIndex} className="mb-2">
+//                   <button
+//                     className="w-full py-2 bg-gray-200 rounded hover:bg-gray-300"
+//                     onClick={() => handleVote(pollIndex, optionIndex)}
+//                   >
+//                     {option}
+//                   </button>
+//                   {poll.votes.reduce((acc, vote) => acc + vote, 0) > 0 && (
+//                     <div className="mt-1 text-gray-700">
+//                       {((poll.votes[optionIndex] / poll.votes.reduce((acc, vote) => acc + vote, 0)) * 100).toFixed(1)}%
+//                     </div>
+//                   )}
+//                 </div>
+//               ))}
+//             </div>
+//           </div>
+//         ))}
+//         <button
+//           className="fixed right-8 bottom-8 py-2 px-4 text-white bg-purple-500 rounded-full hover:bg-purple-600 shadow-lg"
+//           onClick={addPoll}
+//         >
+//           Add Poll
+//         </button>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default PollManager;
+
 'use client';
 import { useState } from 'react';
 
 const PollManager = () => {
-  const [polls, setPolls] = useState([{ question: '', options: ['', ''], votes: [0, 0] }]);
+  const [activeTab, setActiveTab] = useState('Venue');
+  const [polls, setPolls] = useState({
+    Venue: [{ question: '', options: ['', ''], votes: [0, 0] }],
+    Schedule: [{ question: '', options: ['', ''], votes: [0, 0] }],
+    Others: [{ question: '', options: ['', ''], votes: [0, 0] }]
+  });
 
-  const handleChange = (e, pollIndex, optionIndex) => {
-    const newPolls = [...polls];
-    newPolls[pollIndex].options[optionIndex] = e.target.value;
+  const handleChange = (e, tab, pollIndex, optionIndex) => {
+    const newPolls = { ...polls };
+    newPolls[tab][pollIndex].options[optionIndex] = e.target.value;
     setPolls(newPolls);
   };
 
-  const handleVote = (pollIndex, optionIndex) => {
-    const newPolls = [...polls];
-    newPolls[pollIndex].votes[optionIndex] += 1;
+  const handleVote = (tab, pollIndex, optionIndex) => {
+    const newPolls = { ...polls };
+    newPolls[tab][pollIndex].votes[optionIndex] += 1;
     setPolls(newPolls);
   };
 
-  const handleQuestionChange = (e, pollIndex) => {
-    const newPolls = [...polls];
-    newPolls[pollIndex].question = e.target.value;
+  const handleQuestionChange = (e, tab, pollIndex) => {
+    const newPolls = { ...polls };
+    newPolls[tab][pollIndex].question = e.target.value;
     setPolls(newPolls);
   };
 
-  const addOption = (pollIndex) => {
-    const newPolls = [...polls];
-    newPolls[pollIndex].options.push('');
-    newPolls[pollIndex].votes.push(0);
+  const addOption = (tab, pollIndex) => {
+    const newPolls = { ...polls };
+    newPolls[tab][pollIndex].options.push('');
+    newPolls[tab][pollIndex].votes.push(0);
     setPolls(newPolls);
   };
 
-  const addPoll = () => {
-    setPolls([...polls, { question: '', options: ['', ''], votes: [0, 0] }]);
+  const addPoll = (tab) => {
+    const newPolls = { ...polls };
+    newPolls[tab].push({ question: '', options: ['', ''], votes: [0, 0] });
+    setPolls(newPolls);
   };
 
   return (
     <div className="relative min-h-screen bg-white bg-dotted-pattern bg-contain py-8">
       <h1 className="text-3xl font-bold text-center text-purple-500 mb-8">Event Planner Polls</h1>
       <div className="max-w-2xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg">
-        <h1 className="text-2xl font-bold mb-4">Create Your Polls</h1>
-        {polls.map((poll, pollIndex) => (
+        <div className="flex justify-between mb-8 space-x-4"> {/* Added space-x-4 for spacing */}
+          {['Venue', 'Schedule', 'Others'].map((tab) => (
+            <button
+              key={tab}
+              className={`w-full py-2 text-white rounded ${activeTab === tab ? 'bg-purple-500' : 'bg-gray-300'} hover:bg-purple-600`}
+              onClick={() => setActiveTab(tab)}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+        <h1 className="text-2xl font-bold mb-4">Create Your Polls - {activeTab}</h1>
+        {polls[activeTab].map((poll, pollIndex) => (
           <div key={pollIndex} className="mb-8">
             <input
               type="text"
               placeholder="Enter your poll question"
               value={poll.question}
-              onChange={(e) => handleQuestionChange(e, pollIndex)}
+              onChange={(e) => handleQuestionChange(e, activeTab, pollIndex)}
               className="w-full p-2 mb-4 border border-gray-300 rounded"
             />
             {poll.options.map((option, optionIndex) => (
@@ -110,14 +227,14 @@ const PollManager = () => {
                   type="text"
                   placeholder={`Option ${optionIndex + 1}`}
                   value={option}
-                  onChange={(e) => handleChange(e, pollIndex, optionIndex)}
+                  onChange={(e) => handleChange(e, activeTab, pollIndex, optionIndex)}
                   className="w-full p-2 border border-gray-300 rounded"
                 />
               </div>
             ))}
             <button
               className="w-full py-2 mt-4 text-white bg-purple-500 rounded hover:bg-purple-600"
-              onClick={() => addOption(pollIndex)}
+              onClick={() => addOption(activeTab, pollIndex)}
             >
               Add Option
             </button>
@@ -127,7 +244,7 @@ const PollManager = () => {
                 <div key={optionIndex} className="mb-2">
                   <button
                     className="w-full py-2 bg-gray-200 rounded hover:bg-gray-300"
-                    onClick={() => handleVote(pollIndex, optionIndex)}
+                    onClick={() => handleVote(activeTab, pollIndex, optionIndex)}
                   >
                     {option}
                   </button>
@@ -143,7 +260,7 @@ const PollManager = () => {
         ))}
         <button
           className="fixed right-8 bottom-8 py-2 px-4 text-white bg-purple-500 rounded-full hover:bg-purple-600 shadow-lg"
-          onClick={addPoll}
+          onClick={() => addPoll(activeTab)}
         >
           Add Poll
         </button>
