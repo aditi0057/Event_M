@@ -150,8 +150,8 @@ const Gallery: React.FC = () => {
 
   return (
     <div className="container mx-auto p-6 bg-white bg-dotted-pattern bg-contain">
-      <h1 className="text-3xl text-center font-bold mb-6">Event Gallery</h1>
-      <div className="mb-6">
+     <h1 className="text-4xl text-center font-extrabold mb-9 mt-7 text-transparent  bg-clip-text bg-gradient-to-r from-pink-500 via-blue-500 to-indigo-500 ">Event Gallery</h1>
+     <div className="mb-6">
         <h2 className="text-xl font-bold mb-4">Add New Event</h2>
         <div className="flex gap-4 mb-4">
           <input

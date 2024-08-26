@@ -320,7 +320,7 @@ const UpcomingEventsCalendar = () => {
 
   return (
     <div className="min-h-screen bg-white bg-dotted-pattern bg-contain">
-      <h1 className="text-3xl text-center font-bold mb-9 mt-7 text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500">Upcoming Events</h1>
+      <h1 className="text-3xl text-center font-bold mb-9 mt-7 text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500">Events Calendar</h1>
       <div className="container mx-auto p-6 bg-white shadow-xl rounded-lg">
         <div className="flex justify-between mb-4">
           <button
