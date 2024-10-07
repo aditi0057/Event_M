@@ -11,14 +11,13 @@ import LoginSignupPopup from '../../app/login/page';
 
 const NavItems = () => {
   const pathname = usePathname();
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Manage login state
-  const [isPopupOpen, setIsPopupOpen] = useState(false); // Manage popup state
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isPopupOpen, setIsPopupOpen] = useState(false); 
 
   useEffect(() => {
-    // Placeholder for checking login status
-    // Replace with actual logic for checking if the user is logged in
+    
     const checkLoginStatus = () => {
-      const loggedIn = Boolean(localStorage.getItem('isLoggedIn')); // Example logic using localStorage
+      const loggedIn = Boolean(localStorage.getItem('isLoggedIn'));
       setIsLoggedIn(loggedIn);
     };
 
@@ -26,8 +25,8 @@ const NavItems = () => {
   }, []);
 
   const handleLogout = () => {
-    // Handle logout logic
-    localStorage.removeItem('isLoggedIn'); // Simulate logging out by removing the login status
+  
+    localStorage.removeItem('isLoggedIn'); 
     setIsLoggedIn(false);
   };
 
@@ -37,9 +36,9 @@ const NavItems = () => {
 
   const handleClosePopup = () => {
     setIsPopupOpen(false);
-    // Simulate setting the user as logged in after the popup is closed
+    
     setIsLoggedIn(true);
-    localStorage.setItem('isLoggedIn', 'true'); // Example logic using localStorage
+    localStorage.setItem('isLoggedIn', 'true'); 
   };
 
   return (
