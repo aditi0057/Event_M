@@ -18,10 +18,14 @@ The frontend is built using Next.js and Tailwind CSS, while the backend is imple
 - A welcoming dashboard with an intuitive UI.
 - Quick access to upcoming events and recent activities.
 
+![image](https://github.com/user-attachments/assets/ac8e74f4-4591-4b09-97e4-0cd692845b01)
+
+
 ### 📅 Calendar
 
 - Users’ birthdays and anniversaries are automatically recorded upon login.
 - Personalized scheduling system to suggest optimal celebration times.
+
 
 ### 🎈 Event Calendar Page
 
