@@ -26,6 +26,9 @@ The frontend is built using Next.js and Tailwind CSS, while the backend is imple
 - Users’ birthdays and anniversaries are automatically recorded upon login.
 - Personalized scheduling system to suggest optimal celebration times.
 
+![image](https://github.com/user-attachments/assets/194929af-1fb7-4b7b-93c0-3eda21ca6e8f)
+
+
 
 ### 🎈 Event Calendar Page
 
@@ -33,11 +36,18 @@ The frontend is built using Next.js and Tailwind CSS, while the backend is imple
 - Shows details like **date, time, and location** of upcoming celebrations.
 - Ensures no overlap with critical meetings or work schedules.
 
+![image](https://github.com/user-attachments/assets/06b32910-93d7-48ef-85c5-436d3a3171e9)
+![image](https://github.com/user-attachments/assets/8b5703dd-20e1-488e-8415-f956ff52fa85)
+
+
+
 ### 🗳️ Poll Page
 
 - Users and admins can create polls to decide on event dates, venues, and activities.
 - Encourages team participation for seamless planning.
 - Real-time voting and discussion for enhanced collaboration.
+
+![image](https://github.com/user-attachments/assets/20e753a9-73fa-424a-8abb-c0120c66c027)
 
 ### 📸 Gallery Page (⭐ Cloudinary Integration ⭐)
 
@@ -45,10 +55,17 @@ The frontend is built using Next.js and Tailwind CSS, while the backend is imple
 - **Admins have the power to remove inappropriate images.**
 - Secure and optimized storage using **Cloudinary**, ensuring high-quality images with fast delivery.
 
+![image](https://github.com/user-attachments/assets/159f8ee4-30f7-4f2e-98ab-25354e012920)
+
+
 ### 👤 Profile Pages
 
 - **User Profile:** Manage personal event details and uploaded photos.
 - **Admin Profile:** Oversee all events, polls, and gallery uploads with moderation controls.
+
+![image](https://github.com/user-attachments/assets/16f31464-dd5c-4006-a356-fee0fe0194c0)
+![image](https://github.com/user-attachments/assets/4ac9e5f8-4824-4f34-99e1-eb86ac4d5aeb)
+
 
 ---
 
