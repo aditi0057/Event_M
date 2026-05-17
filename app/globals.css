@@ -67,6 +67,7 @@
 }
 
 * {
+  box-sizing: border-box;
   list-style: none;
   padding: 0;
   margin: 0;
@@ -76,6 +77,8 @@
 body {
   font-family: var(--font-poppins);
   overflow-x: hidden;
+  background: #f5f6f7;
+  color: #1f2933;
 }
 
 .filter-grey {
@@ -86,7 +89,7 @@ body {
 /* ========================================== TAILWIND STYLES */
 @layer utilities {
   .wrapper {
-    @apply max-w-7xl lg:mx-auto p-5 md:px-10 xl:px-0 w-full;
+    @apply mx-auto w-full max-w-[1200px] px-4 py-6 sm:px-6 lg:px-8;
   }
 
   .flex-center {
@@ -100,12 +103,12 @@ body {
   /* TYPOGRAPHY */
   /* 64 */
   .h1-bold {
-    @apply font-bold text-[40px] leading-[48px] lg:text-[48px] lg:leading-[60px]  xl:text-[58px] xl:leading-[74px];
+    @apply font-semibold text-[36px] leading-[44px] lg:text-[48px] lg:leading-[58px] xl:text-[56px] xl:leading-[66px];
   }
 
   /* 40 */
   .h2-bold {
-    @apply font-bold text-[32px] leading-[40px] lg:text-[36px] lg:leading-[44px] xl:text-[40px] xl:leading-[48px];
+    @apply font-semibold text-[26px] leading-[34px] lg:text-[32px] lg:leading-[40px];
   }
 
   .h2-medium {
@@ -114,7 +117,7 @@ body {
 
   /* 36 */
   .h3-bold {
-    @apply font-bold text-[28px] leading-[36px] md:text-[36px] md:leading-[44px];
+    @apply font-semibold text-[20px] leading-[28px] md:text-[24px] md:leading-[32px];
   }
 
   .h3-medium {
@@ -219,7 +222,7 @@ body {
   }
 
   .button {
-    @apply rounded-full h-[54px] p-regular-16;
+    @apply h-11 rounded-md px-5 text-sm font-semibold;
   }
 
   .select-item {
@@ -231,9 +234,43 @@ body {
   }
 }
 
+@layer components {
+  .page-shell {
+    @apply min-h-[calc(100vh-144px)] bg-[#f5f6f7];
+  }
+
+  .section-header {
+    @apply flex flex-col gap-4 border-b border-[#d9dde3] pb-5 md:flex-row md:items-end md:justify-between;
+  }
+
+  .eyebrow {
+    @apply text-xs font-semibold uppercase text-[#667085];
+  }
+
+  .surface {
+    @apply border border-[#d9dde3] bg-white shadow-[0_18px_50px_rgba(31,41,51,0.06)];
+  }
+
+  .empty-state {
+    @apply border border-dashed border-[#cfd6dd] bg-white px-6 py-12 text-center text-[#6b7280];
+  }
+
+  .section-copy {
+    @apply max-w-2xl;
+  }
+
+  .grid-fit-320 {
+    @apply grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3;
+  }
+
+  .grid-fit-260 {
+    @apply grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+  }
+}
+
 /* ========================================== CLERK STYLES */
 .cl-logoImage {
-  height: 38px;
+  height: 28px;
 }
 
 .cl-userButtonBox {

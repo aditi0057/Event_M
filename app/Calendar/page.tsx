@@ -1,30 +1,23 @@
+'use client';
 
-
-
-"use client";
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
+import { fetchPersonalCalendarEvents } from '@/services/api';
 
 const months = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December'
 ];
 
-const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-const events = {
-  '2024-7-17': { type: 'Birthday', name: 'Rajat' },
-  '2024-7-13': { type: 'Anniversary', name: 'Ajay' },
-  '2024-7-2': { type: 'Birthday', name: 'Simran' },
-  '2024-7-21': { type: 'Anniversary', name: 'Nidhi' },
-  // Add more events here
-};
+interface FormattedEvents {
+  [key: string]: { type: string; name: string };
+}
 
-const getDaysInMonth = (month, year) => {
-  return new Date(year, month + 1, 0).getDate();
-};
+const getDaysInMonth = (month: number, year: number) => new Date(year, month + 1, 0).getDate();
 
-const renderDays = (month, year, events) => {
+const renderDays = (month: number, year: number, events: FormattedEvents) => {
   const daysInMonth = getDaysInMonth(month, year);
   const firstDay = new Date(year, month, 1).getDay();
   const weeks = [];
@@ -38,26 +31,24 @@ const renderDays = (month, year, events) => {
     }
   }
 
-  if (week.length > 0) {
-    weeks.push(week.concat(Array(7 - week.length).fill(null)));
-  }
+  if (week.length > 0) weeks.push(week.concat(Array(7 - week.length).fill(null)));
 
   return weeks.map((week, index) => (
-    <div key={index} className="grid grid-cols-7 gap-1">
+    <div key={index} className="grid grid-cols-7 border-t border-[#e8ecef]">
       {week.map((day, i) => {
         const event = events[`${year}-${month + 1}-${day}`];
         return (
           <div
             key={i}
-            className={`h-16  w-78 mb-2  flex flex-col items-center justify-center border ${
-              day ? 'bg-white' : 'bg-gray-100'
-            } ${event ? 'bg-blue-100' : ''}`}
+            className={`min-h-[104px] border-r border-[#e8ecef] p-3 last:border-r-0 ${
+              day ? 'bg-white' : 'bg-[#f9fafb]'
+            }`}
           >
-            {day}
+            {day && <span className="text-sm font-semibold text-[#1f2933]">{day}</span>}
             {event && (
-              <div className="text-xs text-gray-700 mt-1 text-center ">
-                <div className="font-bold">{event.type}</div>
-                <div>{event.name}</div>
+              <div className="mt-3 border-l-2 border-[#214f3a] bg-[#eef6f1] px-2 py-1.5">
+                <div className="text-[11px] font-semibold uppercase text-[#214f3a]">{event.type}</div>
+                <div className="mt-1 truncate text-xs text-[#374151]">{event.name}</div>
               </div>
             )}
           </div>
@@ -68,10 +59,33 @@ const renderDays = (month, year, events) => {
 };
 
 const CalendarPage = () => {
-  const currentYear = new Date().getFullYear();
-  const currentMonth = new Date().getMonth();
-  const [month, setMonth] = useState(currentMonth);
-  const [year, setYear] = useState(currentYear);
+  const today = new Date();
+  const [month, setMonth] = useState(today.getMonth());
+  const [year, setYear] = useState(today.getFullYear());
+  const [events, setEvents] = useState<FormattedEvents>({});
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadCalendarData = async () => {
+      setIsLoading(true);
+      try {
+        const eventsData = await fetchPersonalCalendarEvents(year, month + 1);
+        const formatted: FormattedEvents = {};
+        eventsData.forEach((event) => {
+          const eventDate = new Date(event.date);
+          const key = `${eventDate.getFullYear()}-${eventDate.getMonth() + 1}-${eventDate.getDate()}`;
+          formatted[key] = { type: event.type, name: event.title };
+        });
+        setEvents(formatted);
+      } catch (error) {
+        console.error("Failed to load calendar events:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadCalendarData();
+  }, [month, year]);
 
   const handlePrevMonth = () => {
     if (month === 0) {
@@ -92,35 +106,56 @@ const CalendarPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white bg-dotted-pattern bg-contain ">
-     <h1 className="text-4xl text-center font-extrabold mb-9 mt-7 text-transparent  bg-clip-text bg-gradient-to-r from-pink-500 via-blue-500 to-indigo-500 ">Calendar</h1>
+    <section className="page-shell">
+      <div className="wrapper space-y-8">
+        <div className="section-header">
+          <div className="section-copy">
+            <p className="eyebrow">People calendar</p>
+            <h1 className="h2-bold mt-2">Team Calendar</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-[#6b7280]">
+              Birthdays, anniversaries, work milestones, and team celebrations by month.
+            </p>
+          </div>
+        </div>
 
-      <div className="container mx-auto p-4 bg-white shadow-lg rounded-lg">
-        <div className="flex justify-between mb-4">
-          <button
-            onClick={handlePrevMonth}
-            className="bg-indigo-500 text-white px-4 py-2 rounded-full hover:bg-indigo-700 flex items-center"
-          >
-            <ChevronLeftIcon className="h-5 w-5" />
-          </button>
-          <h2 className="text-2xl font-bold">{months[month]} {year}</h2>
-          <button
-            onClick={handleNextMonth}
-            className="bg-indigo-500 text-white px-4 py-2 rounded-full hover:bg-indigo-700 flex items-center"
-          >
-            <ChevronRightIcon className="h-5 w-5" />
-          </button>
-        </div>
-        <div className="grid grid-cols-7 gap-1 mb-2 text-center font-semibold">
-          {days.map((day) => (
-            <div key={day} className="text-blue-700">
-              {day}
+        <div className="surface overflow-hidden">
+          <div className="flex items-center justify-between gap-3 border-b border-[#d9dde3] px-4 py-4 sm:px-6">
+            <button
+              onClick={handlePrevMonth}
+              className="border border-[#cfd6dd] bg-white p-2 text-[#1f2933] transition hover:bg-[#eef1f4]"
+              aria-label="Previous month"
+            >
+              <ChevronLeftIcon className="h-5 w-5" />
+            </button>
+            <h2 className="text-center text-base font-semibold text-[#1f2933] sm:text-xl">{months[month]} {year}</h2>
+            <button
+              onClick={handleNextMonth}
+              className="border border-[#cfd6dd] bg-white p-2 text-[#1f2933] transition hover:bg-[#eef1f4]"
+              aria-label="Next month"
+            >
+              <ChevronRightIcon className="h-5 w-5" />
+            </button>
+          </div>
+
+          <div className="overflow-x-auto">
+            <div className="min-w-[700px]">
+              <div className="grid grid-cols-7 bg-[#f9fafb] text-center text-xs font-semibold uppercase text-[#667085]">
+                {daysOfWeek.map((day) => (
+                  <div key={day} className="border-r border-[#e8ecef] px-2 py-3 last:border-r-0">
+                    {day}
+                  </div>
+                ))}
+              </div>
+              {isLoading ? (
+                <div className="flex h-96 items-center justify-center text-sm text-[#6b7280]">Loading calendar...</div>
+              ) : (
+                renderDays(month, year, events)
+              )}
             </div>
-          ))}
+          </div>
         </div>
-        {renderDays(month, year, events)}
       </div>
-    </div>
+    </section>
   );
 };
 

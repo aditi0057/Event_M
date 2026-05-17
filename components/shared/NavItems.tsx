@@ -1,13 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { headerLinks } from '@/constants';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FaUserCircle } from 'react-icons/fa'; 
-import { AiOutlineLogin } from 'react-icons/ai'; 
-import { IoLogOut } from 'react-icons/io5';
-import LoginSignupPopup from '../../app/login/page'; 
 
 const NavItems = () => {
   const pathname = usePathname();
@@ -42,46 +37,31 @@ const NavItems = () => {
   };
 
   return (
-    <div className="flex items-center justify-between w-full">
-      <ul className="flex justify-center items-center gap-10">
-        {headerLinks.map((link) => {
-          const isActive = pathname === link.route;
-          
-          return (
-            <li
-              key={link.route}
-              className={`${
-                isActive ? 'text-primary-500' : ''
-              } flex-center p-medium-16 whitespace-nowrap`}
+    <ul className="flex w-full flex-col items-start gap-1 md:flex-row md:items-center md:justify-center md:gap-2">
+      {headerLinks.map((link) => {
+        const isActive = pathname === link.route;
+        
+        return (
+          <li
+            key={link.route}
+            className={`w-full md:w-auto ${
+              isActive ? 'text-[#1f2933]' : 'text-[#6b7280]'
+            }`}
+          >
+            <Link
+              href={link.route}
+              className={`block w-full rounded-md px-3 py-2 text-sm font-medium transition-colors md:w-auto ${
+                isActive
+                  ? 'bg-[#eef1f4] text-[#1f2933]'
+                  : 'hover:bg-[#f3f6f8] hover:text-[#1f2933]'
+              }`}
             >
-              <Link href={link.route}>{link.label}</Link>
-            </li>
-          );
-        })}
-      </ul>
-      <div className="flex items-center gap-4">
-        {!isLoggedIn ? (
-          <button onClick={handleLoginClick} className="text-primary-500 text-xl flex items-center gap-2 px-60">
-            <AiOutlineLogin />
-            Login/Signup
-          </button>
-        ) : (
-          <>
-            <Link href="/UserDashboard">
-              <button className="text-primary-500 text-xl flex items-center  px-60 ">
-                <FaUserCircle />
-                Profile
-              </button>
+              {link.label}
             </Link>
-            <button onClick={handleLogout} className="text-primary-500 text-xl flex items-center -ml-56 ">
-              <IoLogOut />
-              Logout
-            </button>
-          </>
-        )}
-      </div>
-      <LoginSignupPopup isOpen={isPopupOpen} onClose={handleClosePopup} />
-    </div>
+          </li>
+        );
+      })}
+    </ul>
   );
 };
 
