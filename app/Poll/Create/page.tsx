@@ -1,141 +1,78 @@
-'use client';
+"use client"
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContent';
-import { createPoll } from '@/services/api';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { X } from 'lucide-react';
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+import { X } from "lucide-react"
+import { createPoll } from "@/services/api"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Select } from "@/components/ui/select"
+import { useToast } from "@/components/ui/toast"
+import { useAuth } from "@/context/AuthContent"
 
-const CreatePollPage = () => {
-  const { user } = useAuth();
-  const router = useRouter();
-  const [question, setQuestion] = useState('');
-  const [tab, setTab] = useState<'Venue' | 'Schedule' | 'Others'>('Venue');
-  const [options, setOptions] = useState(['', '']);
-  const [startTime, setStartTime] = useState('');
-  const [endTime, setEndTime] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+export default function CreatePollPage() {
+  const router = useRouter()
+  const { toast } = useToast()
+  const { user, isLoading: authLoading } = useAuth()
+  const [question, setQuestion] = useState("")
+  const [tab, setTab] = useState("Venue")
+  const [options, setOptions] = useState(["", ""])
+  const [deadline, setDeadline] = useState("")
+  const [multiple, setMultiple] = useState(false)
+  const [error, setError] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
 
-  if (user && user.role !== 'admin') {
-    router.push('/Poll');
-    return null;
-  }
-
-  const handleAddOption = () => setOptions([...options, '']);
-
-  const handleOptionChange = (index: number, value: string) => {
-    const newOptions = [...options];
-    newOptions[index] = value;
-    setOptions(newOptions);
-  };
-
-  const handleRemoveOption = (index: number) => {
-    if (options.length <= 2) return;
-    setOptions(options.filter((_, i) => i !== index));
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      await createPoll({
-        question,
-        tab,
-        options,
-        start_time: startTime,
-        end_time: endTime,
-      });
-      router.push('/Poll');
-    } catch (err: any) {
-      setError(err.message || 'An unexpected error occurred.');
-    } finally {
-      setIsLoading(false);
+  useEffect(() => {
+    if (!authLoading && user?.role !== "admin") {
+      toast("You don't have permission to create polls.", "error")
+      router.replace("/Poll")
     }
-  };
+  }, [authLoading, router, toast, user])
+
+  const submit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const cleanOptions = options.map((option) => option.trim()).filter(Boolean)
+    if (!question.trim() || cleanOptions.length < 2) { setError("Question and at least two options are required."); return }
+    setIsLoading(true)
+    try {
+      const now = new Date().toISOString()
+      const end = deadline ? new Date(deadline).toISOString() : new Date(Date.now() + 7 * 86400000).toISOString()
+      await createPoll({ question, tab, options: cleanOptions, start_time: now, end_time: end, allowMultipleVotes: multiple })
+      toast("Poll created successfully.", "success")
+      router.push("/Poll")
+    } catch (err: any) {
+      toast(err.message || "Could not create poll.", "error")
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   return (
     <section className="page-shell">
-      <div className="wrapper max-w-4xl space-y-8">
-        <div className="section-header">
-          <div>
-            <p className="eyebrow">Admin publishing</p>
-            <h1 className="h2-bold mt-2">Create Poll</h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-[#6b7280]">
-              Create a time-bound decision point for event planning and team preferences.
-            </p>
+      <div className="wrapper max-w-2xl space-y-8 py-10">
+        <div className="section-header"><div><p className="eyebrow">Team decisions</p><h1 className="mt-2 text-3xl font-semibold">Create Poll</h1></div></div>
+        <form onSubmit={submit} className="surface grid gap-5 p-6">
+          <Input label="Question" value={question} onChange={(e) => setQuestion(e.target.value)} error={error && !question ? error : ""} />
+          <Select label="Category" value={tab} onChange={setTab} options={["Venue", "Schedule", "Food", "Others"].map((value) => ({ label: value, value }))} />
+          <div className="grid gap-3">
+            <label className="text-sm font-semibold">Options</label>
+            {options.map((option, index) => (
+              <div key={index} className="flex gap-2">
+                <Input placeholder={`Option ${index + 1}`} value={option} onChange={(e) => setOptions((current) => current.map((item, i) => i === index ? e.target.value : item))} />
+                {options.length > 2 && <Button type="button" variant="ghost" size="icon" onClick={() => setOptions((current) => current.filter((_, i) => i !== index))}><X className="h-4 w-4" /></Button>}
+              </div>
+            ))}
+            <Button type="button" variant="secondary" disabled={options.length >= 8} onClick={() => setOptions((current) => [...current, ""])}>Add option</Button>
           </div>
-        </div>
-
-        <form onSubmit={handleSubmit} className="surface grid gap-6 p-6">
-          <div className="grid gap-2">
-            <label htmlFor="question" className="text-sm font-semibold text-[#374151]">Poll Question</label>
-            <Input id="question" name="question" value={question} onChange={(e) => setQuestion(e.target.value)} required />
-          </div>
-
-          <div className="grid gap-5 sm:grid-cols-3">
-            <div className="grid gap-2">
-              <label htmlFor="tab" className="text-sm font-semibold text-[#374151]">Category</label>
-              <select
-                id="tab"
-                name="tab"
-                value={tab}
-                onChange={(e) => setTab(e.target.value as any)}
-                className="h-11 border border-[#cfd6dd] bg-white px-3 text-sm text-[#1f2933] focus:outline-none focus:ring-2 focus:ring-[#1f2933]"
-              >
-                <option value="Venue">Venue</option>
-                <option value="Schedule">Schedule</option>
-                <option value="Others">Others</option>
-              </select>
-            </div>
-            <div className="grid gap-2">
-              <label htmlFor="startTime" className="text-sm font-semibold text-[#374151]">Voting Starts</label>
-              <Input id="startTime" name="startTime" type="datetime-local" value={startTime} onChange={(e) => setStartTime(e.target.value)} required />
-            </div>
-            <div className="grid gap-2">
-              <label htmlFor="endTime" className="text-sm font-semibold text-[#374151]">Voting Ends</label>
-              <Input id="endTime" name="endTime" type="datetime-local" value={endTime} onChange={(e) => setEndTime(e.target.value)} required />
-            </div>
-          </div>
-
-          <div>
-            <label className="mb-3 block text-sm font-semibold text-[#374151]">Options</label>
-            <div className="space-y-3">
-              {options.map((option, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <Input
-                    placeholder={`Option ${index + 1}`}
-                    value={option}
-                    onChange={(e) => handleOptionChange(index, e.target.value)}
-                    required
-                  />
-                  {options.length > 2 && (
-                    <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveOption(index)} aria-label="Remove option">
-                      <X className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-              ))}
-            </div>
-            <Button type="button" variant="outline" onClick={handleAddOption} className="mt-4">
-              Add Option
-            </Button>
-          </div>
-
-          {error && <p className="text-sm text-red-600">{error}</p>}
-
-          <div className="flex justify-end gap-3 border-t border-[#e8ecef] pt-5">
-            <Button type="button" variant="outline" onClick={() => router.push('/Poll')}>Cancel</Button>
-            <Button type="submit" disabled={isLoading}>{isLoading ? 'Creating...' : 'Create Poll'}</Button>
+          <Input label="Voting deadline" type="datetime-local" value={deadline} onChange={(e) => setDeadline(e.target.value)} helperText="Optional. Defaults to seven days." />
+          <label className="flex items-center gap-3 text-sm font-semibold"><input type="checkbox" checked={multiple} onChange={(e) => setMultiple(e.target.checked)} /> Allow multiple votes</label>
+          {error && <p className="text-sm text-[var(--color-danger)]">{error}</p>}
+          <div className="flex justify-end gap-3 border-t border-[var(--color-border)] pt-5">
+            <Button type="button" variant="secondary" onClick={() => router.push("/Poll")}>Cancel</Button>
+            <Button type="submit" disabled={isLoading}>{isLoading ? "Creating..." : "Create Poll"}</Button>
           </div>
         </form>
       </div>
     </section>
-  );
-};
-
-export default CreatePollPage;
+  )
+}

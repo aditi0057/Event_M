@@ -1,3 +1,4 @@
+@import "../styles/tokens.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -75,10 +76,29 @@
 }
 
 body {
-  font-family: var(--font-poppins);
+  font-family: var(--font-sans);
   overflow-x: hidden;
-  background: #f5f6f7;
-  color: #1f2933;
+  background: var(--color-bg-page);
+  color: var(--color-text-primary);
+}
+
+.eventm-logo {
+  display: block;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+
+[data-theme="dark"] .eventm-logo,
+.eventm-logo-on-dark {
+  filter: brightness(0) invert(1);
+  mix-blend-mode: normal;
+}
+
+[data-theme="dark"] input[type="datetime-local"] {
+  color-scheme: dark;
+  background-color: #1e1e30;
+  color: #e0e0f0;
+  border-color: #3a3a5c;
 }
 
 .filter-grey {
@@ -89,7 +109,10 @@ body {
 /* ========================================== TAILWIND STYLES */
 @layer utilities {
   .wrapper {
-    @apply mx-auto w-full max-w-[1200px] px-4 py-6 sm:px-6 lg:px-8;
+    max-width: var(--content-width);
+    padding-left: clamp(16px, 4vw, 48px);
+    padding-right: clamp(16px, 4vw, 48px);
+    @apply mx-auto w-full py-6;
   }
 
   .flex-center {
@@ -236,23 +259,33 @@ body {
 
 @layer components {
   .page-shell {
-    @apply min-h-[calc(100vh-144px)] bg-[#f5f6f7];
+    min-height: calc(100vh - var(--navbar-height));
+    background: var(--color-bg-page);
   }
 
   .section-header {
-    @apply flex flex-col gap-4 border-b border-[#d9dde3] pb-5 md:flex-row md:items-end md:justify-between;
+    border-bottom: 1px solid var(--color-border);
+    @apply flex flex-col gap-4 pb-5 md:flex-row md:items-end md:justify-between;
   }
 
   .eyebrow {
-    @apply text-xs font-semibold uppercase text-[#667085];
+    color: var(--color-text-secondary);
+    @apply text-xs font-semibold uppercase;
   }
 
   .surface {
-    @apply border border-[#d9dde3] bg-white shadow-[0_18px_50px_rgba(31,41,51,0.06)];
+    border: 1px solid var(--color-card-border);
+    background: var(--color-card-bg);
+    box-shadow: var(--shadow-sm);
+    border-radius: var(--radius-md);
   }
 
   .empty-state {
-    @apply border border-dashed border-[#cfd6dd] bg-white px-6 py-12 text-center text-[#6b7280];
+    border: 1px dashed var(--color-border-strong);
+    background: var(--color-card-bg);
+    color: var(--color-text-secondary);
+    border-radius: var(--radius-md);
+    @apply px-6 py-12 text-center;
   }
 
   .section-copy {
@@ -260,12 +293,51 @@ body {
   }
 
   .grid-fit-320 {
-    @apply grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3;
+    grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+    @apply grid gap-5;
   }
 
   .grid-fit-260 {
     @apply grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
   }
+}
+
+.hero-premium {
+  background:
+    radial-gradient(ellipse 70% 60% at 75% 20%, rgba(108, 99, 255, 0.18) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 20% 80%, rgba(99, 179, 255, 0.08) 0%, transparent 60%),
+    linear-gradient(160deg, #0A0A14 0%, #0D0D1F 50%, #0A0A14 100%);
+}
+
+.hero-premium::before {
+  background-image: radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.gallery-grid {
+  columns: 3;
+  column-gap: 16px;
+}
+
+.gallery-item {
+  break-inside: avoid;
+  margin-bottom: 16px;
+  border: 1px solid var(--color-card-border);
+  box-shadow: var(--shadow-xs);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.gallery-item:hover {
+  transform: scale(1.02);
+  box-shadow: var(--shadow-md);
+}
+
+@media (max-width: 1023px) {
+  .gallery-grid { columns: 2; }
+}
+
+@media (max-width: 600px) {
+  .gallery-grid { columns: 1; }
 }
 
 /* ========================================== CLERK STYLES */

@@ -1,162 +1,94 @@
-'use client';
+"use client"
 
-import { useEffect, useState } from 'react';
-import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
-import { fetchPersonalCalendarEvents } from '@/services/api';
+import { useEffect, useMemo, useState } from "react"
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react"
+import Link from "next/link"
+import { fetchPersonalCalendarEvents } from "@/services/api"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { CalendarSkeleton } from "@/components/ui/skeleton"
 
-const months = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
-];
+const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+const categories = ["Festival", "Birthday", "Work", "Sports", "Other"]
 
-const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-interface FormattedEvents {
-  [key: string]: { type: string; name: string };
-}
-
-const getDaysInMonth = (month: number, year: number) => new Date(year, month + 1, 0).getDate();
-
-const renderDays = (month: number, year: number, events: FormattedEvents) => {
-  const daysInMonth = getDaysInMonth(month, year);
-  const firstDay = new Date(year, month, 1).getDay();
-  const weeks = [];
-  let week = Array(firstDay).fill(null);
-
-  for (let day = 1; day <= daysInMonth; day++) {
-    week.push(day);
-    if (week.length === 7) {
-      weeks.push(week);
-      week = [];
-    }
-  }
-
-  if (week.length > 0) weeks.push(week.concat(Array(7 - week.length).fill(null)));
-
-  return weeks.map((week, index) => (
-    <div key={index} className="grid grid-cols-7 border-t border-[#e8ecef]">
-      {week.map((day, i) => {
-        const event = events[`${year}-${month + 1}-${day}`];
-        return (
-          <div
-            key={i}
-            className={`min-h-[104px] border-r border-[#e8ecef] p-3 last:border-r-0 ${
-              day ? 'bg-white' : 'bg-[#f9fafb]'
-            }`}
-          >
-            {day && <span className="text-sm font-semibold text-[#1f2933]">{day}</span>}
-            {event && (
-              <div className="mt-3 border-l-2 border-[#214f3a] bg-[#eef6f1] px-2 py-1.5">
-                <div className="text-[11px] font-semibold uppercase text-[#214f3a]">{event.type}</div>
-                <div className="mt-1 truncate text-xs text-[#374151]">{event.name}</div>
-              </div>
-            )}
-          </div>
-        );
-      })}
-    </div>
-  ));
-};
-
-const CalendarPage = () => {
-  const today = new Date();
-  const [month, setMonth] = useState(today.getMonth());
-  const [year, setYear] = useState(today.getFullYear());
-  const [events, setEvents] = useState<FormattedEvents>({});
-  const [isLoading, setIsLoading] = useState(true);
+export default function CalendarPage() {
+  const today = new Date()
+  const [month, setMonth] = useState(today.getMonth())
+  const [year, setYear] = useState(today.getFullYear())
+  const [events, setEvents] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [listView, setListView] = useState(false)
+  const [popover, setPopover] = useState<any>(null)
 
   useEffect(() => {
-    const loadCalendarData = async () => {
-      setIsLoading(true);
-      try {
-        const eventsData = await fetchPersonalCalendarEvents(year, month + 1);
-        const formatted: FormattedEvents = {};
-        eventsData.forEach((event) => {
-          const eventDate = new Date(event.date);
-          const key = `${eventDate.getFullYear()}-${eventDate.getMonth() + 1}-${eventDate.getDate()}`;
-          formatted[key] = { type: event.type, name: event.title };
-        });
-        setEvents(formatted);
-      } catch (error) {
-        console.error("Failed to load calendar events:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    setLoading(true)
+    fetchPersonalCalendarEvents(year, month + 1).then(setEvents).catch(() => setEvents([])).finally(() => setLoading(false))
+  }, [month, year])
 
-    loadCalendarData();
-  }, [month, year]);
+  const weeks = useMemo(() => {
+    const daysInMonth = new Date(year, month + 1, 0).getDate()
+    const firstDay = new Date(year, month, 1).getDay()
+    const days: (number | null)[] = [...Array(firstDay).fill(null), ...Array.from({ length: daysInMonth }, (_, i) => i + 1)]
+    while (days.length % 7) days.push(null)
+    return Array.from({ length: days.length / 7 }, (_, i) => days.slice(i * 7, i * 7 + 7))
+  }, [month, year])
 
-  const handlePrevMonth = () => {
-    if (month === 0) {
-      setMonth(11);
-      setYear(year - 1);
-    } else {
-      setMonth(month - 1);
-    }
-  };
+  const eventsForDay = (day: number | null) => !day ? [] : events.filter((event) => {
+    const date = new Date(event.date)
+    return date.getFullYear() === year && date.getMonth() === month && date.getDate() === day
+  })
 
-  const handleNextMonth = () => {
-    if (month === 11) {
-      setMonth(0);
-      setYear(year + 1);
-    } else {
-      setMonth(month + 1);
-    }
-  };
+  const shift = (direction: number) => {
+    const next = new Date(year, month + direction, 1)
+    setMonth(next.getMonth())
+    setYear(next.getFullYear())
+  }
 
   return (
-    <section className="page-shell">
-      <div className="wrapper space-y-8">
-        <div className="section-header">
-          <div className="section-copy">
-            <p className="eyebrow">People calendar</p>
-            <h1 className="h2-bold mt-2">Team Calendar</h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-[#6b7280]">
-              Birthdays, anniversaries, work milestones, and team celebrations by month.
-            </p>
-          </div>
+    <section className="h-[calc(100dvh-var(--navbar-height))] overflow-hidden bg-[var(--color-bg-page)]">
+      <div className="mx-auto flex h-full w-full max-w-[var(--content-width)] flex-col gap-4 px-[clamp(16px,4vw,48px)] py-4">
+        <div className="section-header shrink-0">
+          <div className="section-copy"><p className="eyebrow">People calendar</p><h1 className="mt-2 text-3xl font-semibold">Team Calendar</h1><p className="mt-2 text-sm text-[var(--color-text-secondary)]">Events, birthdays, anniversaries, and team celebrations by month.</p></div>
         </div>
 
-        <div className="surface overflow-hidden">
-          <div className="flex items-center justify-between gap-3 border-b border-[#d9dde3] px-4 py-4 sm:px-6">
-            <button
-              onClick={handlePrevMonth}
-              className="border border-[#cfd6dd] bg-white p-2 text-[#1f2933] transition hover:bg-[#eef1f4]"
-              aria-label="Previous month"
-            >
-              <ChevronLeftIcon className="h-5 w-5" />
-            </button>
-            <h2 className="text-center text-base font-semibold text-[#1f2933] sm:text-xl">{months[month]} {year}</h2>
-            <button
-              onClick={handleNextMonth}
-              className="border border-[#cfd6dd] bg-white p-2 text-[#1f2933] transition hover:bg-[#eef1f4]"
-              aria-label="Next month"
-            >
-              <ChevronRightIcon className="h-5 w-5" />
-            </button>
-          </div>
-
-          <div className="overflow-x-auto">
-            <div className="min-w-[700px]">
-              <div className="grid grid-cols-7 bg-[#f9fafb] text-center text-xs font-semibold uppercase text-[#667085]">
-                {daysOfWeek.map((day) => (
-                  <div key={day} className="border-r border-[#e8ecef] px-2 py-3 last:border-r-0">
-                    {day}
-                  </div>
-                ))}
-              </div>
-              {isLoading ? (
-                <div className="flex h-96 items-center justify-center text-sm text-[#6b7280]">Loading calendar...</div>
-              ) : (
-                renderDays(month, year, events)
-              )}
+        <div className="surface flex min-h-0 flex-1 flex-col overflow-hidden">
+          <div className="shrink-0 flex flex-col gap-4 border-b border-[var(--color-border)] p-3 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-center justify-between gap-3">
+              <Button variant="secondary" size="icon" onClick={() => shift(-1)}><ChevronLeft className="h-4 w-4" /></Button>
+              <h2 className="min-w-48 text-center text-xl font-semibold">{months[month]} {year}</h2>
+              <Button variant="secondary" size="icon" onClick={() => shift(1)}><ChevronRight className="h-4 w-4" /></Button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="secondary" onClick={() => { setMonth(today.getMonth()); setYear(today.getFullYear()) }}>Today</Button>
+              <Button variant="secondary" onClick={() => setListView((value) => !value)}>{listView ? "Grid view" : "List view"}</Button>
             </div>
           </div>
+          <div className="shrink-0 flex flex-wrap gap-2 border-b border-[var(--color-border)] p-3">{categories.map((category) => <Badge key={category} color={category}>{category}</Badge>)}</div>
+
+          {loading ? <div className="min-h-0 flex-1 p-4"><CalendarSkeleton /></div> : listView ? (
+            <div className="min-h-0 flex-1 divide-y divide-[var(--color-border)] overflow-y-auto">
+              {events.length ? events.map((event) => <Link href={`/Events/${event._id || event.id}`} key={`${event.title}-${event.date}`} className="flex items-center justify-between gap-4 p-4 hover:bg-[var(--color-surface-1)]"><div><p className="font-semibold">{event.title}</p><p className="text-sm text-[var(--color-text-secondary)]">{new Date(event.date).toLocaleString()}</p></div><Badge color={event.type}>{event.type}</Badge></Link>) : <p className="p-8 text-center text-sm text-[var(--color-text-secondary)]">No events this month.</p>}
+            </div>
+          ) : (
+            <div className="min-h-0 flex-1 overflow-x-auto">
+              <div className="flex h-full min-w-[700px] flex-col md:min-w-0">
+                <div className="grid shrink-0 grid-cols-7 bg-[var(--color-surface-1)] text-center text-[11px] font-semibold uppercase text-[var(--color-text-secondary)]">{daysOfWeek.map((day) => <div key={day} className="border-r border-[var(--color-border)] px-2 py-2 last:border-r-0">{day}</div>)}</div>
+                <div className="flex min-h-0 flex-1 flex-col">
+                {weeks.map((week, i) => <div key={i} className="grid min-h-0 flex-1 grid-cols-7 border-t border-[var(--color-border)]">{week.map((day, index) => {
+                  const dayEvents = eventsForDay(day)
+                  return <div key={`${day}-${index}`} className="min-h-0 overflow-hidden border-r border-[var(--color-border)] bg-[var(--color-card-bg)] p-2 text-xs last:border-r-0 md:p-3">
+                    <div className="flex items-center justify-between">{day && <span className="font-semibold">{day}</span>}{day && <Link href={`/Events/Create?date=${year}-${month + 1}-${day}`} className="opacity-0 hover:opacity-100"><Plus className="h-3 w-3" /></Link>}</div>
+                    <div className="mt-2 space-y-1 overflow-hidden">{dayEvents.slice(0, 3).map((event) => <button key={`${event.title}-${event.date}`} onClick={() => setPopover(event)} title={`${event.title} ${new Date(event.date).toLocaleTimeString()}`} className="block w-full truncate rounded border border-dashed border-current bg-[var(--color-accent-light)] px-2 py-1 text-left text-[11px] text-[var(--color-accent)]">{event.title}</button>)}</div>
+                  </div>
+                })}</div>)}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
+      {popover && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4" onClick={() => setPopover(null)}><div className="surface max-w-sm p-5" onClick={(event) => event.stopPropagation()}><Badge color={popover.type}>{popover.type}</Badge><h3 className="mt-3 text-xl font-semibold">{popover.title}</h3><p className="mt-2 text-sm text-[var(--color-text-secondary)]">{new Date(popover.date).toLocaleString()}</p><Button asChild className="mt-5"><Link href={`/Events/${popover._id || popover.id}`}>View full event &rarr;</Link></Button></div></div>}
     </section>
-  );
-};
-
-export default CalendarPage;
+  )
+}

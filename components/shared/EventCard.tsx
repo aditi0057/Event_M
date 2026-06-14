@@ -1,7 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { CalendarDays, UserCircle } from 'lucide-react';
+import { BriefcaseBusiness, Cake, CalendarDays, Trophy, Sparkles } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Avatar } from '@/components/ui/avatar';
 
 type EventCardProps = {
   event: {
@@ -11,59 +13,64 @@ type EventCardProps = {
     date: string;
     type: string;
     imageUrl?: string;
+    location?: string;
+    attendees?: { fullname?: string; avatar?: string }[];
     host?: {
       _id?: string;
       fullname?: string;
+      avatar?: string;
     };
+    hostName?: string;
   };
 };
 
 const EventCard = ({ event }: EventCardProps) => {
   const eventDate = new Date(event.date);
-  const fallbackImage = `https://placehold.co/900x600/e7f0ea/1f2933?text=${encodeURIComponent(event.type)}`;
-  const imageSrc = event.imageUrl || fallbackImage;
+  const hasImage = Boolean(event.imageUrl);
+  const Icon = event.type === "Birthday" ? Cake : event.type === "Work" ? BriefcaseBusiness : event.type === "Sports" ? Trophy : event.type === "Festival" ? Sparkles : CalendarDays;
+  const gradients: Record<string, string> = {
+    Festival: "from-[var(--category-festival)] to-[#A78BFA]",
+    Birthday: "from-[var(--category-birthday)] to-[#F472B6]",
+    Work: "from-[var(--category-work)] to-[#38BDF8]",
+    Sports: "from-[var(--category-sports)] to-[#86EFAC]",
+    Other: "from-[var(--category-other)] to-[#9CA3AF]",
+  };
 
   return (
     <Link
       href={`/Events/${event._id}`}
-      className="group flex h-full flex-col overflow-hidden border border-[#d9dde3] bg-white transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_45px_rgba(31,41,51,0.10)]"
+      className="group flex h-full max-h-[330px] flex-col overflow-hidden rounded-[var(--radius-md)] border border-[var(--color-card-border)] bg-[var(--color-card-bg)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)] focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus)]"
     >
-      <div className="relative aspect-[16/10] overflow-hidden bg-[#e8ecef]">
-        <img
-          src={imageSrc}
-          alt={event.title}
-          className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
-          onError={(event) => {
-            event.currentTarget.src = fallbackImage;
-          }}
-        />
+      <div className={`relative h-[180px] overflow-hidden bg-gradient-to-br ${gradients[event.type] || gradients.Other}`}>
+        {hasImage ? (
+          <img
+            src={event.imageUrl}
+            alt={event.title}
+            className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+          />
+        ) : <Icon className="absolute left-1/2 top-1/2 h-8 w-8 -translate-x-1/2 -translate-y-1/2 text-white/40" />}
       </div>
-      <div className="flex flex-1 flex-col gap-4 p-5">
+      <div className="flex flex-1 flex-col gap-3 p-4">
         <div className="flex items-center justify-between gap-3">
-          <span className="border border-[#c9ddd1] bg-[#eef6f1] px-3 py-1 text-xs font-semibold text-[#214f3a]">
-            {event.type}
-          </span>
-          <span className="text-xs text-[#667085]">
-            {eventDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+          <Badge color={event.type}>{event.type}</Badge>
+          <span className="text-xs text-[var(--color-text-secondary)]">
+            {eventDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
           </span>
         </div>
 
-        <div className="space-y-2">
-          <h3 className="line-clamp-2 text-lg font-semibold leading-6 text-[#1f2933]">{event.title}</h3>
+        <div className="space-y-1">
+          <h3 className="line-clamp-2 text-[15px] font-semibold leading-5 text-[var(--color-text-primary)]">{event.title}</h3>
           {event.description && (
-            <p className="line-clamp-2 text-sm leading-6 text-[#6b7280]">{event.description}</p>
+            <p className="truncate text-xs leading-5 text-[var(--color-text-secondary)]">{event.description}</p>
           )}
         </div>
 
-        <div className="mt-auto grid gap-2 border-t border-[#e8ecef] pt-4 text-sm text-[#4b5563]">
-          <div className="flex items-center gap-2">
-            <CalendarDays className="h-4 w-4 text-[#667085]" />
-            <span>{eventDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+        <div className="mt-auto flex items-center justify-between gap-3 border-t border-[var(--color-border)] pt-3 text-xs text-[var(--color-text-secondary)]">
+          <div className="flex min-w-0 items-center gap-2">
+            <Avatar src={event.host?.avatar} name={event.host?.fullname || event.hostName} size="sm" />
+            <span className="truncate">{event.host?.fullname || event.hostName || 'Host'}</span>
           </div>
-          <div className="flex items-center gap-2">
-            <UserCircle className="h-4 w-4 text-[#667085]" />
-            <span>{event.host?.fullname || 'Host to be confirmed'}</span>
-          </div>
+          <span className="shrink-0">{event.attendees?.length || 0} attending</span>
         </div>
       </div>
     </Link>

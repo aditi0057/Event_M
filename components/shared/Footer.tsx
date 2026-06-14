@@ -1,39 +1,50 @@
 import Image from "next/image";
 import Link from "next/link";
-import { headerLinks } from "@/constants";
+
+const platformLinks = [
+  ["Events", "/Events"],
+  ["Calendar", "/Calendar"],
+  ["Polls", "/Poll"],
+  ["Gallery", "/Gallery"],
+];
+
+const accountLinks = [
+  ["My Profile", "/UserDashboard"],
+  ["Settings", "/settings"],
+  ["Notifications", "/notifications"],
+];
 
 const Footer = () => {
   return (
-    <footer className="border-t border-[#d9dde3] bg-white">
-      <div className="wrapper py-8">
-        <div className="flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
-          <div className="max-w-sm text-center md:text-left">
-            <Link href='/' className="inline-flex items-center">
-              <Image
-                src="/assets/images/logo.png"
-                alt="logo"
-                width={104}
-                height={34}
-              />
+    <footer className="bg-[#0A0A14] text-[13px] text-white/55">
+      <div className="mx-auto w-full max-w-[var(--content-width)] px-[clamp(16px,4vw,48px)]">
+        <div className="flex flex-col gap-8 py-10 md:flex-row md:items-start md:justify-between">
+          <div className="max-w-sm">
+            <Link href="/" className="inline-flex items-center">
+              <Image src="/assets/images/logo.png" alt="EventM logo" width={104} height={34} className="eventm-logo eventm-logo-on-dark h-auto w-[104px]" />
             </Link>
-            <p className="mt-3 text-sm leading-6 text-[#6b7280]">
-              A shared workspace for internal events, planning, participation, and team memories.
-            </p>
+            <p className="mt-4 leading-6">Bringing teams together, one moment at a time.</p>
           </div>
-
-          <div className="flex flex-col items-center gap-3 md:items-end">
-            <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-2 md:justify-end">
-              {headerLinks.map((link) => (
-                <Link
-                  key={link.route}
-                  href={link.route}
-                  className="rounded-md px-3 py-2 text-sm font-medium text-[#6b7280] transition-colors hover:bg-[#f3f6f8] hover:text-[#1f2933]"
-                >
-                  {link.label}
-                </Link>
-              ))}
+          <div className="grid grid-cols-2 gap-12">
+            <div>
+              <h3 className="font-semibold text-white/85">Platform</h3>
+              <div className="mt-3 grid gap-2">
+                {platformLinks.map(([label, href]) => <Link key={href} href={href} className="transition hover:text-white/85">{label}</Link>)}
+              </div>
             </div>
-            <p className="text-xs text-[#6b7280]">2025 EventM. All rights reserved.</p>
+            <div>
+              <h3 className="font-semibold text-white/85">Account</h3>
+              <div className="mt-3 grid gap-2">
+                {accountLinks.map(([label, href]) => <Link key={href} href={href} className="transition hover:text-white/85">{label}</Link>)}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-col gap-3 border-t border-white/[0.08] py-4 md:flex-row md:items-center md:justify-between">
+          <p>© 2025 EventM. All rights reserved.</p>
+          <div className="flex gap-4">
+            <Link href="#" className="transition hover:text-white/85">Privacy Policy</Link>
+            <Link href="#" className="transition hover:text-white/85">Terms of Service</Link>
           </div>
         </div>
       </div>
@@ -42,4 +53,3 @@ const Footer = () => {
 };
 
 export default Footer;
-

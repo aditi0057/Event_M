@@ -1,20 +1,19 @@
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google";
 import "./globals.css";
-// Correct the import path from AuthContent to AuthContext
 import { AuthProvider } from "@/context/AuthContent"; 
 import Header from "@/components/shared/Header";
 import Footer from "@/components/shared/Footer";
-
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-poppins',
-});
+import { ToastProvider } from "@/components/ui/toast";
 
 export const metadata: Metadata = {
-  title: "EventM",
+  title: {
+    default: "EventM",
+    template: "%s — EventM",
+  },
   description: "Corporate Event Management",
+  icons: {
+    icon: "/assets/images/logo.png",
+  },
 };
 
 export default function RootLayout({
@@ -24,14 +23,20 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${poppins.variable} bg-[#f5f6f7] text-[#1f2933]`}>
-        {/* The AuthProvider now correctly wraps your entire application */}
+      <body>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(()=>{try{const s=localStorage.getItem('theme');const m=window.matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.setAttribute('data-theme',s||(m?'dark':'light'));}catch(e){}})();`,
+          }}
+        />
         <AuthProvider>
-          <div className="flex min-h-screen flex-col">
-            <Header />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </div>
+          <ToastProvider>
+            <div className="flex min-h-screen flex-col">
+              <Header />
+              <main className="flex-1">{children}</main>
+              <Footer />
+            </div>
+          </ToastProvider>
         </AuthProvider>
       </body>
     </html>

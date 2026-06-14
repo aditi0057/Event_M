@@ -1,0 +1,119 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --color-bg-page: #f7f8fa;
+  --color-bg-surface: #ffffff;
+  --color-bg-elevated: #ffffff;
+  --color-bg-hover: #f7f8fa;
+  --color-primary: #0f0f0f;
+  --color-primary-hover: #1a1a2e;
+  --color-accent: #6c63ff;
+  --color-accent-light: #eef0ff;
+  --color-surface-0: #ffffff;
+  --color-surface-1: #f7f8fa;
+  --color-surface-2: #edeef2;
+  --color-card-bg: #ffffff;
+  --color-card-border: #e2e4ea;
+  --color-input-bg: #ffffff;
+  --color-input-border: #e2e4ea;
+  --color-input-focus: rgba(108,99,255,0.25);
+  --color-navbar-bg: rgba(255,255,255,0.95);
+  --color-btn-primary-bg: #0f0f0f;
+  --color-btn-primary-text: #ffffff;
+  --color-btn-secondary-bg: #ffffff;
+  --color-btn-secondary-border: #e2e4ea;
+  --color-border: #e2e4ea;
+  --color-border-strong: #c8cad4;
+  --color-text-primary: #0d0d12;
+  --color-text-secondary: #5a5c6a;
+  --color-text-tertiary: #9395a1;
+  --color-success: #16a34a;
+  --color-success-bg: #f0fdf4;
+  --color-warning: #d97706;
+  --color-warning-bg: #fffbeb;
+  --color-danger: #dc2626;
+  --color-danger-bg: #fef2f2;
+  --color-info: #2563eb;
+  --color-info-bg: #eff6ff;
+  --category-festival: #7c3aed;
+  --category-festival-bg: #ede9fe;
+  --category-birthday: #db2777;
+  --category-birthday-bg: #fce7f3;
+  --category-work: #0369a1;
+  --category-work-bg: #e0f2fe;
+  --category-sports: #15803d;
+  --category-sports-bg: #dcfce7;
+  --category-other: #6b7280;
+  --category-other-bg: #f3f4f6;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --text-xs: 11px;
+  --text-sm: 13px;
+  --text-base: 15px;
+  --text-lg: 17px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
+  --text-3xl: 30px;
+  --text-4xl: 36px;
+  --text-5xl: 48px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-sm: 0 1px 4px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.03);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.10), 0 0 0 1px rgba(0,0,0,0.04);
+  --shadow-focus: 0 0 0 3px rgba(108,99,255,0.25);
+  --content-width: 1200px;
+  --page-padding: 24px;
+  --navbar-height: 60px;
+  --admin-sidebar-width: 220px;
+}
+
+[data-theme="dark"] {
+  --color-bg-page: #0f0f1a;
+  --color-bg-surface: #12121E;
+  --color-bg-elevated: #1A1A2C;
+  --color-bg-hover: #1F1F32;
+  --color-surface-0: #12121E;
+  --color-surface-1: #0A0A14;
+  --color-surface-2: #1A1A2C;
+  --color-border: rgba(255,255,255,0.08);
+  --color-border-strong: rgba(255,255,255,0.14);
+  --color-text-primary: #F0F0F6;
+  --color-text-secondary: #8B8CA0;
+  --color-text-tertiary: #5A5B6E;
+  --color-accent: #6C63FF;
+  --color-accent-light: rgba(108,99,255,0.15);
+  --color-card-bg: #12121E;
+  --color-card-border: rgba(255,255,255,0.07);
+  --color-input-bg: #1A1A2C;
+  --color-input-border: rgba(255,255,255,0.10);
+  --color-input-focus: rgba(108,99,255,0.35);
+  --color-navbar-bg: rgba(13,13,31,0.94);
+  --color-btn-primary-bg: #6C63FF;
+  --color-btn-primary-text: #FFFFFF;
+  --color-btn-secondary-bg: #1A1A2C;
+  --color-btn-secondary-border: rgba(255,255,255,0.12);
+  --color-primary: #F0F0F6;
+  --color-primary-hover: #ffffff;
+}
+
+@media (max-width: 767px) {
+  :root {
+    --page-padding: 16px;
+  }
+}
