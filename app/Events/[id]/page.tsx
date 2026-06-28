@@ -68,7 +68,12 @@ export default function EventDetailsPage() {
 
   const chooseRsvp = async (status: "going" | "maybe" | "not_going") => {
     setRsvp(status)
-    try { await rsvpEvent(id, status); toast("RSVP confirmed.", "success") } catch { toast("Saved locally. Server RSVP endpoint is unavailable.", "warning") }
+    try {
+      await rsvpEvent(id, status)
+      toast("RSVP confirmed.", "success")
+    } catch (error: any) {
+      toast(error.message || "Error occurred", "error")
+    }
   }
 
   const confirmDelete = async () => {

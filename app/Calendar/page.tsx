@@ -30,8 +30,8 @@ export default function CalendarPage() {
     const daysInMonth = new Date(year, month + 1, 0).getDate()
     const firstDay = new Date(year, month, 1).getDay()
     const days: (number | null)[] = [...Array(firstDay).fill(null), ...Array.from({ length: daysInMonth }, (_, i) => i + 1)]
-    while (days.length % 7) days.push(null)
-    return Array.from({ length: days.length / 7 }, (_, i) => days.slice(i * 7, i * 7 + 7))
+    while (days.length < 42) days.push(null)
+    return Array.from({ length: 6 }, (_, i) => days.slice(i * 7, i * 7 + 7))
   }, [month, year])
 
   const eventsForDay = (day: number | null) => !day ? [] : events.filter((event) => {
@@ -46,10 +46,10 @@ export default function CalendarPage() {
   }
 
   return (
-    <section className="h-[calc(100dvh-var(--navbar-height))] overflow-hidden bg-[var(--color-bg-page)]">
-      <div className="mx-auto flex h-full w-full max-w-[var(--content-width)] flex-col gap-4 px-[clamp(16px,4vw,48px)] py-4">
-        <div className="section-header shrink-0">
-          <div className="section-copy"><p className="eyebrow">People calendar</p><h1 className="mt-2 text-3xl font-semibold">Team Calendar</h1><p className="mt-2 text-sm text-[var(--color-text-secondary)]">Events, birthdays, anniversaries, and team celebrations by month.</p></div>
+    <section className="flex h-[calc(100vh-64px)] flex-col overflow-hidden bg-[var(--color-bg-page)]">
+      <div className="mx-auto flex min-h-0 w-full max-w-[var(--content-width)] flex-1 flex-col gap-2 px-[clamp(12px,3vw,32px)] py-2">
+        <div className="section-header max-h-[60px] shrink-0 overflow-hidden">
+          <div className="section-copy"><p className="eyebrow">People calendar</p><h1 className="mt-1 text-2xl font-semibold md:text-3xl">Team Calendar</h1></div>
         </div>
 
         <div className="surface flex min-h-0 flex-1 flex-col overflow-hidden">
@@ -64,24 +64,25 @@ export default function CalendarPage() {
               <Button variant="secondary" onClick={() => setListView((value) => !value)}>{listView ? "Grid view" : "List view"}</Button>
             </div>
           </div>
-          <div className="shrink-0 flex flex-wrap gap-2 border-b border-[var(--color-border)] p-3">{categories.map((category) => <Badge key={category} color={category}>{category}</Badge>)}</div>
+          <div className="hidden shrink-0 flex-wrap gap-2 border-b border-[var(--color-border)] p-2 md:flex">{categories.map((category) => <Badge key={category} color={category}>{category}</Badge>)}</div>
 
           {loading ? <div className="min-h-0 flex-1 p-4"><CalendarSkeleton /></div> : listView ? (
             <div className="min-h-0 flex-1 divide-y divide-[var(--color-border)] overflow-y-auto">
               {events.length ? events.map((event) => <Link href={`/Events/${event._id || event.id}`} key={`${event.title}-${event.date}`} className="flex items-center justify-between gap-4 p-4 hover:bg-[var(--color-surface-1)]"><div><p className="font-semibold">{event.title}</p><p className="text-sm text-[var(--color-text-secondary)]">{new Date(event.date).toLocaleString()}</p></div><Badge color={event.type}>{event.type}</Badge></Link>) : <p className="p-8 text-center text-sm text-[var(--color-text-secondary)]">No events this month.</p>}
             </div>
           ) : (
-            <div className="min-h-0 flex-1 overflow-x-auto">
-              <div className="flex h-full min-w-[700px] flex-col md:min-w-0">
-                <div className="grid shrink-0 grid-cols-7 bg-[var(--color-surface-1)] text-center text-[11px] font-semibold uppercase text-[var(--color-text-secondary)]">{daysOfWeek.map((day) => <div key={day} className="border-r border-[var(--color-border)] px-2 py-2 last:border-r-0">{day}</div>)}</div>
-                <div className="flex min-h-0 flex-1 flex-col">
-                {weeks.map((week, i) => <div key={i} className="grid min-h-0 flex-1 grid-cols-7 border-t border-[var(--color-border)]">{week.map((day, index) => {
+            <div className="min-h-0 flex-1 overflow-hidden">
+              <div className="flex h-full min-w-0 flex-col">
+                <div className="grid shrink-0 grid-cols-7 bg-[var(--color-surface-1)] text-center text-[11px] font-semibold uppercase text-[var(--color-text-secondary)]">{daysOfWeek.map((day) => <div key={day} className="border-r border-[var(--color-border)] px-1 py-1.5 last:border-r-0"><span className="md:hidden">{day[0]}</span><span className="hidden md:inline">{day}</span></div>)}</div>
+                <div className="grid min-h-0 flex-1 grid-cols-7 grid-rows-6">
+                {weeks.flatMap((week, i) => week.map((day, index) => {
                   const dayEvents = eventsForDay(day)
-                  return <div key={`${day}-${index}`} className="min-h-0 overflow-hidden border-r border-[var(--color-border)] bg-[var(--color-card-bg)] p-2 text-xs last:border-r-0 md:p-3">
+                  return <div key={`${i}-${day || "blank"}-${index}`} className="min-h-0 overflow-hidden border-r border-t border-[var(--color-border)] bg-[var(--color-card-bg)] p-1 text-xs md:p-1">
                     <div className="flex items-center justify-between">{day && <span className="font-semibold">{day}</span>}{day && <Link href={`/Events/Create?date=${year}-${month + 1}-${day}`} className="opacity-0 hover:opacity-100"><Plus className="h-3 w-3" /></Link>}</div>
-                    <div className="mt-2 space-y-1 overflow-hidden">{dayEvents.slice(0, 3).map((event) => <button key={`${event.title}-${event.date}`} onClick={() => setPopover(event)} title={`${event.title} ${new Date(event.date).toLocaleTimeString()}`} className="block w-full truncate rounded border border-dashed border-current bg-[var(--color-accent-light)] px-2 py-1 text-left text-[11px] text-[var(--color-accent)]">{event.title}</button>)}</div>
+                    <div className="mt-1 hidden space-y-1 overflow-hidden md:block">{dayEvents.slice(0, 2).map((event) => <button key={`${event._id || event.id || event.title}-${event.date}`} onClick={() => setPopover(event)} title={`${event.title} ${new Date(event.date).toLocaleTimeString()}`} className="block w-full truncate rounded-full bg-[var(--color-accent-light)] px-1.5 py-0.5 text-left text-[10px] leading-4 text-[var(--color-accent)]">{event.title}</button>)}{dayEvents.length > 2 && <span className="block truncate text-[10px] text-[var(--color-text-secondary)]">+{dayEvents.length - 2} more</span>}</div>
+                    <div className="mt-1 flex flex-wrap gap-0.5 md:hidden">{dayEvents.slice(0, 4).map((event) => <button key={`${event._id || event.id || event.title}-${event.date}-dot`} onClick={() => setPopover(event)} className="h-1.5 w-1.5 rounded-full bg-[var(--color-accent)]" title={event.title} />)}</div>
                   </div>
-                })}</div>)}
+                }))}
                 </div>
               </div>
             </div>

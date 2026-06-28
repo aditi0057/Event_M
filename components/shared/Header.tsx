@@ -59,7 +59,7 @@ const Header = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const unreadCount = useMemo(() => notifications.filter((item) => !item.read).length, [notifications]);
+  const unreadCount = useMemo(() => notifications.filter((item) => !(item.read || item.isRead)).length, [notifications]);
 
   const handleLogout = async () => {
     try {
@@ -127,7 +127,7 @@ const Header = () => {
             <div className="h-10 w-24 animate-pulse rounded-md bg-gray-200"></div>
           ) : user ? (
             <>
-              <div className="relative hidden md:block" ref={notificationsRef}>
+              <div className="relative block" ref={notificationsRef}>
                 <button onClick={toggleNotifications} className="relative flex h-9 w-9 items-center justify-center rounded-full text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-text-primary)] focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus)]">
                   <Bell className="h-4 w-4" />
                   {unreadCount > 0 && <span className="absolute right-0 top-0 flex min-h-4 min-w-4 items-center justify-center rounded-full bg-[var(--color-danger)] px-1 text-[10px] font-semibold text-white">{unreadCount}</span>}
@@ -142,10 +142,10 @@ const Header = () => {
                       {notifications.length === 0 ? (
                         <p className="px-3 py-8 text-center text-sm text-[var(--color-text-secondary)]">You're all caught up ✓</p>
                       ) : notifications.slice(0, 5).map((item) => {
-                        const icon = item.type === "birthday" ? "🎂" : item.type === "poll" ? "📊" : item.type === "approval" ? "✅" : item.type === "announcement" ? "📣" : "📅";
+                        const icon = item.type === "poll" ? "Poll" : item.type === "approval" ? "OK" : item.type === "announcement" ? "Note" : "Event";
                         return (
-                          <button key={item._id} onClick={() => openNotification(item)} className={`flex w-full gap-3 rounded-[var(--radius-md)] px-3 py-3 text-left transition hover:bg-[var(--color-bg-hover)] ${!item.read ? "border-l-[3px] border-[var(--color-accent)] bg-[var(--color-accent-light)]" : ""}`}>
-                            <span className="text-base">{icon}</span>
+                          <button key={item._id} onClick={() => openNotification(item)} className={`flex w-full gap-3 rounded-[var(--radius-md)] px-3 py-3 text-left transition hover:bg-[var(--color-bg-hover)] ${!(item.read || item.isRead) ? "border-l-[3px] border-[var(--color-accent)] bg-[var(--color-accent-light)]" : ""}`}>
+                            <span className="w-10 shrink-0 text-[11px] font-semibold text-[var(--color-accent)]">{icon}</span>
                             <span className="min-w-0">
                               <span className="block text-[13px] leading-5 text-[var(--color-text-primary)]">{item.message}</span>
                               <span className="mt-1 block text-[11px] text-[var(--color-text-secondary)]">{new Date(item.createdAt).toLocaleString()}</span>
@@ -158,7 +158,7 @@ const Header = () => {
                   </div>
                 )}
               </div>
-              <div className="relative hidden md:block" ref={userMenuRef}>
+              <div className="relative block" ref={userMenuRef}>
                 <button onClick={toggleProfile} className="flex items-center gap-2 rounded-full p-1 pr-2 hover:bg-[var(--color-surface-2)] focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus)]">
                   <Avatar src={user.avatar} name={user.fullname} size="md" />
                   <ChevronDown className="h-4 w-4 text-[var(--color-text-secondary)]" />

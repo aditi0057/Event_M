@@ -10,7 +10,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1
 const parseResponse = async (response: Response) => {
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error(payload?.error?.message || payload?.message || 'Request failed');
+    throw new Error(payload?.message || payload?.error || payload?.error?.message || 'Error occurred');
   }
   return payload.data ?? payload;
 };
@@ -74,7 +74,8 @@ export const fetchEvents = async (params = ''): Promise<any[]> => {
     credentials: 'include',
   });
   if (!response.ok) {
-    throw new Error('Failed to fetch events');
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data.message || data.error || 'Error occurred');
   }
   const data = await response.json();
   return data.data?.docs || data.data || [];
@@ -121,8 +122,8 @@ export const createEvent = async (eventData: {
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to create event');
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || errorData.error || 'Error occurred');
     }
 
     return parseResponse(response); 
@@ -140,8 +141,8 @@ export const fetchEventById = async (eventId: string) => {
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to fetch event details');
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || errorData.error || 'Error occurred');
     }
 
     return parseResponse(response);
@@ -155,7 +156,8 @@ export const fetchPolls = async (): Promise<any[]> => {
     credentials: 'include',
   });
   if (!response.ok) {
-    throw new Error('Failed to fetch polls');
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data.message || data.error || 'Error occurred');
   }
   const data = await response.json();
   return data.data || [];
@@ -173,8 +175,8 @@ export const voteOnPoll = async (pollId: string, optionIndex: number) => {
     }),
   });
   if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || 'Failed to submit vote');
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || errorData.error || 'Error occurred');
   }
   return parseResponse(response);
 };
@@ -219,8 +221,8 @@ export const createPoll = async (pollData: any) => {
     body: JSON.stringify(pollData),
   });
   if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || 'Failed to create poll');
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || errorData.error || 'Error occurred');
   }
   return parseResponse(response);
 };
@@ -230,18 +232,20 @@ export const fetchPollResults = async (pollId: string) => {
     credentials: 'include',
   });
   if (!response.ok) {
-    throw new Error('Failed to fetch poll results');
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data.message || data.error || 'Error occurred');
   }
   const data = await response.json();
   return data.data; 
 };
 
 export const fetchGalleryImages = async (): Promise<any[]> => {
-  const response = await fetch(`${API_URL}/gallery?limit=12`, {
+  const response = await fetch(`${API_URL}/gallery?limit=60&status=approved`, {
     credentials: 'include',
   });
   if (!response.ok) {
-    throw new Error('Failed to fetch gallery images');
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data.message || data.error || 'Error occurred');
   }
   const data = await response.json();
   return data.data?.docs || data.data || [];
@@ -258,6 +262,8 @@ export const rsvpEvent = async (eventId: string, status: 'going' | 'maybe' | 'no
 };
 
 export const fetchCelebrations = async () => {
+  const celebrationResponse = await fetch(`${API_URL}/events/celebrating-soon`, { credentials: 'include' }).then(parseResponse).catch(() => null);
+  if (celebrationResponse) return { cards: celebrationResponse, birthdays: celebrationResponse.filter((item: any) => item.type === "Birthday"), anniversaries: celebrationResponse.filter((item: any) => item.type === "Anniversary") };
   const [birthdays, anniversaries] = await Promise.all([
     fetch(`${API_URL}/users/birthdays?days=14`, { credentials: 'include' }).then(parseResponse).catch(() => []),
     fetch(`${API_URL}/users/anniversaries?days=14`, { credentials: 'include' }).then(parseResponse).catch(() => []),
@@ -276,7 +282,7 @@ export const markNotificationRead = async (id: string) => {
 };
 
 export const markAllNotificationsRead = async () => {
-  const response = await fetch(`${API_URL}/notifications/read-all`, { method: 'PATCH', credentials: 'include' });
+  const response = await fetch(`${API_URL}/notifications/mark-all-read`, { method: 'PATCH', credentials: 'include' });
   return parseResponse(response);
 };
 
@@ -332,7 +338,7 @@ export const fetchUserSettings = async () => {
 
 export const updateUserSettings = async (settings: Record<string, boolean>) => {
   const response = await fetch(`${API_URL}/users/settings`, {
-    method: 'PATCH',
+    method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
     body: JSON.stringify(settings),
@@ -345,23 +351,55 @@ export const changePassword = async (payload: { currentPassword: string; newPass
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
-    body: JSON.stringify(payload),
+    body: JSON.stringify({ oldPassword: payload.currentPassword, newPassword: payload.newPassword }),
   });
   return parseResponse(response);
 };
 
 export const uploadImage = async (formData: FormData): Promise<any> => {
-  const response = await fetch(`${API_URL}/gallery`, {
+  const response = await fetch(`${API_URL}/gallery/upload`, {
     method: 'POST',
     credentials: 'include',
     body: formData,
   });
 
-  const result = await response.json();
+  const result = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error(result.message || 'Failed to upload image');
+    throw new Error(result.message || result.error || 'Error occurred');
   }
   return result.data;
+};
+
+export const fetchGalleryAlbums = async () => {
+  const response = await fetch(`${API_URL}/gallery/albums`, { credentials: 'include' });
+  const data = await parseResponse(response);
+  return data.docs || data || [];
+};
+
+export const fetchAdminSettings = async () => {
+  const response = await fetch(`${API_URL}/admin/settings`, { credentials: 'include' });
+  return parseResponse(response);
+};
+
+export const updateAdminSettings = async (settings: Record<string, any>) => {
+  const response = await fetch(`${API_URL}/admin/settings`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(settings),
+  });
+  return parseResponse(response);
+};
+
+export const fetchPendingGallery = async () => {
+  const response = await fetch(`${API_URL}/admin/gallery/pending`, { credentials: 'include' });
+  const data = await parseResponse(response);
+  return data.docs || data || [];
+};
+
+export const approveAllGallery = async () => {
+  const response = await fetch(`${API_URL}/admin/gallery/approve-all`, { method: 'POST', credentials: 'include' });
+  return parseResponse(response);
 };
 
 export const fetchPersonalCalendarEvents = async (year: number, month: number): Promise<PersonalCalendarEvent[]> => {

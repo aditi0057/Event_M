@@ -31,6 +31,7 @@ interface Poll {
   results: PollResult[];
   totalVotes: number;
   allowMultipleVotes?: boolean;
+  isActive?: boolean;
 }
 
 const tabs = ['Venue', 'Schedule', 'Food', 'Others'] as const;
@@ -64,8 +65,8 @@ const PollsPage = () => {
     loadPolls();
   }, []);
 
-  const isActivePoll = (poll: Poll) => !poll.end_time || new Date(poll.end_time) > new Date();
-  const filteredPolls = polls.filter((poll) => poll.tab === activeTab && (statusTab === 'Active' ? isActivePoll(poll) : !isActivePoll(poll)));
+  const isActivePoll = (poll: Poll) => poll.isActive !== false && (!poll.end_time || new Date(poll.end_time) > new Date());
+  const filteredPolls = (polls || []).filter((poll) => poll.tab === activeTab && (statusTab === 'Active' ? isActivePoll(poll) : !isActivePoll(poll)));
 
   const startEdit = (poll: Poll) => {
     setEditingPoll(poll);
@@ -150,7 +151,7 @@ const PollsPage = () => {
         )}
 
         {!isLoading && !error && filteredPolls.length === 0 && (
-          <EmptyState title="No active polls" description={`There are no active polls in ${activeTab} right now.`} action={user?.role === 'admin' ? { label: "+ New Poll", href: "/Poll/Create" } : undefined} />
+          <EmptyState title={statusTab === "Active" ? "No active polls right now." : "No closed polls"} action={user?.role === 'admin' && statusTab === "Active" ? { label: "+ New Poll", href: "/Poll/Create" } : undefined} />
         )}
       </div>
       <Modal title="Edit Poll" open={Boolean(editingPoll)} onClose={() => setEditingPoll(null)}>

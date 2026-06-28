@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { fetchNotifications, markAllNotificationsRead, markNotificationRead } from "@/services/api";
 import { Button } from "@/components/ui/button";
 import { EmptyState, ErrorState } from "@/components/ui/empty-state";
@@ -13,6 +13,7 @@ export default function NotificationsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const { toast } = useToast();
+  const router = useRouter();
 
   const load = () => {
     setLoading(true);
@@ -26,14 +27,15 @@ export default function NotificationsPage() {
   useEffect(() => { load(); }, []);
 
   const markAll = async () => {
-    setItems((current) => current.map((item) => ({ ...item, read: true })));
+    setItems((current) => current.map((item) => ({ ...item, read: true, isRead: true })));
     await markAllNotificationsRead();
     toast("Notifications marked read.", "success");
   };
 
   const markOne = async (item: any) => {
-    setItems((current) => current.map((notification) => notification._id === item._id ? { ...notification, read: true } : notification));
+    setItems((current) => current.map((notification) => notification._id === item._id ? { ...notification, read: true, isRead: true } : notification));
     await markNotificationRead(item._id).catch(() => undefined);
+    if (item.link) router.push(item.link);
   };
 
   return (
@@ -49,14 +51,14 @@ export default function NotificationsPage() {
         </div>
         {loading && <div className="space-y-3">{Array.from({ length: 5 }).map((_, index) => <Skeleton key={index} height={72} />)}</div>}
         {error && <ErrorState message={error} onRetry={load} />}
-        {!loading && !error && items.length === 0 && <EmptyState title="You're all caught up" description="New notifications will appear here." />}
+        {!loading && !error && items.length === 0 && <EmptyState title="You're all caught up ✓" />}
         {!loading && !error && items.length > 0 && (
           <div className="surface divide-y divide-[var(--color-border)] overflow-hidden">
             {items.map((item) => (
-              <Link key={item._id} href={item.link || "#"} onClick={() => markOne(item)} className={`block p-4 transition hover:bg-[var(--color-bg-hover)] ${!item.read ? "border-l-[3px] border-[var(--color-accent)] bg-[var(--color-accent-light)]" : ""}`}>
+              <button key={item._id} onClick={() => markOne(item)} className={`block w-full p-4 text-left transition hover:bg-[var(--color-bg-hover)] ${!(item.read || item.isRead) ? "border-l-[3px] border-[var(--color-accent)] bg-[var(--color-accent-light)]" : ""}`}>
                 <p className="text-sm font-medium text-[var(--color-text-primary)]">{item.message}</p>
                 <p className="mt-1 text-xs text-[var(--color-text-secondary)]">{new Date(item.createdAt).toLocaleString()}</p>
-              </Link>
+              </button>
             ))}
           </div>
         )}

@@ -89,13 +89,13 @@ const PollCard = ({ poll: initialPoll, isAdmin = false, onEdit, onDelete }: { po
       </div>
 
       <div className="mt-5 space-y-3">
-        {poll.options.map((option, index) => {
+        {(poll.options || []).map((option, index) => {
           const result = poll.results[index] || { option, count: 0 };
           const percentage = poll.totalVotes > 0 ? Math.min(100, Math.max(0, (result.count / poll.totalVotes) * 100)) : 0;
           const selected = selectedIndex === index;
           return (
           <button
-            key={option}
+            key={`${poll._id}-${option}-${index}`}
             onClick={() => handleVote(index)}
             disabled={isLoading || !isPollActive}
             className="w-full rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-card-bg)] px-4 py-3 text-left text-sm font-medium text-[var(--color-text-primary)] transition hover:border-[var(--color-border-strong)] hover:bg-[var(--color-bg-hover)] disabled:cursor-not-allowed disabled:opacity-80"

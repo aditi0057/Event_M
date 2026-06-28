@@ -29,12 +29,14 @@ export default function Home() {
     ]).then(([eventData, pollData, celebrationData, announcementData]) => {
       setEvents(eventData.slice(0, 3))
       setPolls(pollData.filter((poll: any) => poll.isActive !== false && new Date(poll.end_time) > new Date()).slice(0, 2))
-      setCelebrations([...(celebrationData.birthdays || []).map((user: any) => ({ ...user, kind: "Birthday" })), ...(celebrationData.anniversaries || []).map((user: any) => ({ ...user, kind: "Work anniversary" }))].slice(0, 10))
-      setAnnouncements((announcementData.docs || announcementData || []).filter((item: any) => !item.read).slice(0, 3))
+      const celebrationPayload: any = celebrationData
+      setCelebrations((celebrationPayload.cards || [...(celebrationPayload.birthdays || []).map((user: any) => ({ ...user, kind: "Birthday" })), ...(celebrationPayload.anniversaries || []).map((user: any) => ({ ...user, kind: "Work anniversary" }))]).slice(0, 10))
+      setAnnouncements((announcementData.docs || announcementData || []).filter((item: any) => !(item.read || item.isRead)).slice(0, 3))
     }).finally(() => setLoading(false))
   }, [user])
 
   const celebrationText = (item: any) => {
+    if (item.daysUntil !== undefined) return item.daysUntil === 0 ? `${item.type} today!` : `${item.type} in ${item.daysUntil} days`
     const source = item.kind === "Birthday" ? item.dateOfBirth : item.workJoiningDate
     const date = new Date(source)
     const today = new Date()
@@ -85,9 +87,9 @@ export default function Home() {
               <div className="flex gap-4 overflow-x-auto pb-2">
                 {celebrations.map((user) => (
                   <div key={`${user._id}-${user.kind}`} className="flex min-w-[260px] items-center gap-3 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-card-bg)] p-4">
-                    <Avatar src={user.avatar} name={user.fullname} className="h-12 w-12" />
+                    <Avatar src={user.avatar} name={user.fullname || user.title} className="h-12 w-12" />
                     <div>
-                      <h3 className="text-sm font-semibold">{user.fullname}</h3>
+                      <h3 className="text-sm font-semibold">{user.fullname || user.title}</h3>
                       <p className="mt-1 text-sm text-[var(--color-text-secondary)]">{celebrationText(user)}</p>
                     </div>
                   </div>

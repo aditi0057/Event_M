@@ -2,8 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Megaphone, Settings, Users, CalendarDays, Vote, Images, Trash2 } from "lucide-react";
-import { approveImageApi, closePoll, createAnnouncement, deleteEvent, deleteImage, deletePoll, fetchAdminStats, fetchAdminUsers, fetchAnnouncements, fetchEvents, fetchGalleryImages, fetchPolls, rejectImageApi, updateAdminUserRole, updateAdminUserStatus } from "@/services/api";
+import { approveAllGallery, approveImageApi, closePoll, createAnnouncement, deleteEvent, deleteImage, deletePoll, fetchAdminSettings, fetchAdminStats, fetchAdminUsers, fetchAnnouncements, fetchEvents, fetchPendingGallery, fetchPolls, rejectImageApi, updateAdminSettings, updateAdminUserRole, updateAdminUserStatus } from "@/services/api";
 import { useAuth } from "@/context/AuthContent";
 import { Button } from "@/components/ui/button";
 import { EmptyState, ErrorState } from "@/components/ui/empty-state";
@@ -19,6 +20,7 @@ const nav = [{ label: "Overview", icon: CalendarDays }, { label: "Users", icon: 
 
 export default function AdminPage() {
   const { user, isLoading } = useAuth();
+  const pathname = usePathname();
   const { toast } = useToast();
   const [section, setSection] = useState("Overview");
   const [stats, setStats] = useState<any>(null);
@@ -32,8 +34,20 @@ export default function AdminPage() {
   const [query, setQuery] = useState("");
   const [confirm, setConfirm] = useState<{ title: string; description: string; action: () => Promise<void> } | null>(null);
   const [announcement, setAnnouncement] = useState({ message: "", audience: "All users", priority: "Normal", scheduledAt: "" });
+  const [settings, setSettings] = useState({ requireEventApproval: false, allowUserEvents: true, requireGalleryApproval: true, birthdayReminderDays: 14 });
 
   const isAdmin = user?.role === "admin";
+
+  useEffect(() => {
+    const sectionByPath: Record<string, string> = {
+      "/admin/users": "Users",
+      "/admin/events": "Events",
+      "/admin/polls": "Polls",
+      "/admin/gallery": "Gallery moderation",
+      "/admin/announcements": "Announcements",
+    };
+    setSection(sectionByPath[pathname] || "Overview");
+  }, [pathname]);
 
   const load = () => {
     setLoading(true);
@@ -43,15 +57,17 @@ export default function AdminPage() {
       fetchAdminUsers(query ? `?q=${encodeURIComponent(query)}` : "").catch(() => ({ docs: [], total: 0 })),
       fetchEvents("?limit=50").catch(() => []),
       fetchPolls().catch(() => []),
-      fetchGalleryImages().catch(() => []),
+      fetchPendingGallery().catch(() => []),
       fetchAnnouncements().then((data) => data.docs || data || []).catch(() => []),
-    ]).then(([statsData, userData, eventData, pollData, galleryData, announcementData]) => {
+      fetchAdminSettings().catch(() => null),
+    ]).then(([statsData, userData, eventData, pollData, galleryData, announcementData, settingsData]) => {
       setStats(statsData);
       setUsers(userData);
       setEvents(eventData);
       setPolls(pollData);
       setGallery(galleryData);
       setAnnouncements(announcementData);
+      if (settingsData) setSettings((current) => ({ ...current, ...settingsData }));
     }).catch((err) => setError(err.message || "Could not load admin data.")).finally(() => setLoading(false));
   };
 
@@ -59,13 +75,18 @@ export default function AdminPage() {
     if (!isLoading && user && !isAdmin) { toast("Access denied.", "error"); window.location.href = "/"; }
   }, [isLoading, isAdmin, user, toast]);
   useEffect(() => { if (isAdmin) load(); }, [isAdmin, query]);
+  useEffect(() => {
+    if (!isAdmin || section !== "Gallery moderation") return;
+    const id = window.setInterval(load, 30000);
+    return () => window.clearInterval(id);
+  }, [isAdmin, section, query]);
 
   const statRows = useMemo(() => [
-    ["Total Users", stats?.totalUsers || 0],
-    ["Total Events", stats?.totalEvents || 0],
-    ["Active Polls", stats?.activePolls || 0],
-    ["Pending Gallery", stats?.pendingGallery || 0],
-    ["This month's events", stats?.thisMonthEvents || 0],
+    ["Total Users", stats?.totalUsers || 0, "/admin/users"],
+    ["Total Events", stats?.totalEvents || 0, "/admin/events"],
+    ["Active Polls", stats?.activePolls || 0, "/admin/polls"],
+    ["Pending Gallery", stats?.pendingGallery || 0, "/admin/gallery"],
+    ["This month's events", stats?.thisMonthEvents || 0, "/admin/events"],
   ], [stats]);
 
   const sendAnnouncement = async () => {
@@ -93,7 +114,7 @@ export default function AdminPage() {
           <div className="flex gap-2 overflow-x-auto md:hidden">{nav.map((item) => <Button key={item.label} variant={section === item.label ? "primary" : "secondary"} onClick={() => setSection(item.label)}>{item.label}</Button>)}</div>
           <div className="section-header"><div><p className="eyebrow">Admin</p><h1 className="mt-2 text-3xl font-semibold">{section}</h1></div></div>
 
-          {section === "Overview" && <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">{statRows.map(([label, value]) => <div key={label} className="surface p-4"><p className="text-sm text-[var(--color-text-secondary)]">{label}</p><p className="mt-2 text-3xl font-semibold">{value}</p></div>)}</div>}
+          {section === "Overview" && <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">{statRows.map(([label, value, href]) => <Link key={label} href={href as string} className="surface cursor-pointer p-4 transition hover:scale-[1.02]"><p className="text-sm text-[var(--color-text-secondary)]">{label}</p><p className="mt-2 text-3xl font-semibold">{value}</p></Link>)}</div>}
 
           {section === "Users" && <div className="space-y-4"><Input placeholder="Search users..." value={query} onChange={(e) => setQuery(e.target.value)} /><div className="surface overflow-x-auto"><table className="w-full min-w-[760px] text-sm"><thead><tr className="text-left text-[var(--color-text-secondary)]"><th className="p-3">User</th><th>Username</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead><tbody>{users.docs.map((item: any) => <tr key={item._id} className="border-t border-[var(--color-border)]"><td className="p-3"><div className="flex items-center gap-2"><Avatar src={item.avatar} name={item.fullname} size="sm" />{item.fullname}</div></td><td>{item.username}</td><td>{item.email}</td><td>{item.role}</td><td>{item.isActive === false ? "Inactive" : "Active"}</td><td className="space-x-2"><Button size="sm" variant="secondary" asChild><Link href={`/UserDashboard?id=${item._id}`}>View</Link></Button><Button size="sm" variant="secondary" onClick={() => updateAdminUserRole(item._id, item.role === "admin" ? "user" : "admin").then(load)}>{item.role === "admin" ? "Remove Admin" : "Make Admin"}</Button><Button size="sm" variant="danger" onClick={() => updateAdminUserStatus(item._id, item.isActive === false).then(load)}>{item.isActive === false ? "Reactivate" : "Deactivate"}</Button></td></tr>)}</tbody></table></div><p className="text-sm text-[var(--color-text-secondary)]">Showing {users.docs.length ? 1 : 0}-{users.docs.length} of {users.total || users.docs.length} users</p></div>}
 
@@ -101,11 +122,11 @@ export default function AdminPage() {
 
           {section === "Polls" && <div className="surface overflow-x-auto"><table className="w-full min-w-[760px] text-sm"><thead><tr className="text-left text-[var(--color-text-secondary)]"><th className="p-3">Question</th><th>Category</th><th>Votes</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead><tbody>{polls.map((item) => <tr key={item._id} className="border-t border-[var(--color-border)]"><td className="p-3 font-semibold">{item.question}</td><td>{item.tab}</td><td>{item.totalVotes || 0}</td><td>{item.isActive === false || new Date(item.end_time) < new Date() ? "Closed" : "Open"}</td><td>{new Date(item.createdAt || item.start_time).toLocaleDateString()}</td><td className="space-x-2"><Button size="sm" variant="secondary" onClick={() => closePoll(item._id).then(load)}>Close</Button><Button size="sm" variant="danger" onClick={() => setConfirm({ title: "Delete poll", description: `Delete "${item.question}" permanently?`, action: async () => { await deletePoll(item._id); toast("Poll deleted.", "success"); load(); } })}>Delete</Button></td></tr>)}</tbody></table></div>}
 
-          {section === "Gallery moderation" && <div className="space-y-4"><div className="flex justify-between"><h2 className="text-lg font-semibold">Pending photos</h2><Button variant="secondary" onClick={() => Promise.all(gallery.filter((i) => !i.isApproved).map((i) => approveImageApi(i._id))).then(load)}>Approve All</Button></div><div className="gallery-grid">{gallery.map((image) => <div key={image._id} className="gallery-item relative overflow-hidden rounded-[10px]"><img src={image.image_url} alt="Gallery moderation item" className="w-full rounded-[10px]" /><div className="absolute inset-x-0 bottom-0 flex gap-2 bg-black/65 p-2">{!image.isApproved && <Button size="sm" onClick={() => approveImageApi(image._id).then(load)}>Approve</Button>}<Button size="sm" variant="danger" onClick={() => (image.isApproved ? deleteImage(image._id) : rejectImageApi(image._id)).then(load)}>{image.isApproved ? "Remove" : "Reject"}</Button></div></div>)}</div></div>}
+          {section === "Gallery moderation" && <div className="space-y-4"><div className="flex justify-between"><h2 className="text-lg font-semibold">Pending photos</h2><Button variant="secondary" onClick={() => approveAllGallery().then(load)}>Approve All</Button></div>{gallery.length === 0 ? <EmptyState title="No pending photos ✓" /> : <div className="gallery-grid">{gallery.map((image) => <div key={image._id} className="gallery-item relative overflow-hidden rounded-[10px]"><img src={image.image_url} alt="Gallery moderation item" /><div className="absolute inset-x-0 bottom-0 space-y-2 bg-black/70 p-2"><p className="truncate text-xs font-semibold text-white">{image.uploaded_by?.fullname || "Team member"}</p><div className="flex gap-2"><Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => approveImageApi(image._id).then(load)}>Approve</Button><Button size="sm" variant="danger" onClick={() => rejectImageApi(image._id).then(load)}>Reject</Button></div></div></div>)}</div>}</div>}
 
           {section === "Announcements" && <div className="space-y-5"><div className="surface grid gap-4 p-5"><textarea value={announcement.message} onChange={(e) => setAnnouncement((current) => ({ ...current, message: e.target.value }))} className="min-h-40 rounded-[var(--radius-md)] border border-[var(--color-input-border)] bg-[var(--color-input-bg)] p-3 text-sm" placeholder="Write announcement..." /><div className="grid gap-3 sm:grid-cols-3"><Select value={announcement.audience} onChange={(value) => setAnnouncement((c) => ({ ...c, audience: value }))} options={[{ label: "All users", value: "All users" }, { label: "Select departments", value: "Select departments" }]} /><Select value={announcement.priority} onChange={(value) => setAnnouncement((c) => ({ ...c, priority: value }))} options={[{ label: "Normal", value: "Normal" }, { label: "Urgent", value: "Urgent" }]} /><Input type="datetime-local" value={announcement.scheduledAt} onChange={(e) => setAnnouncement((c) => ({ ...c, scheduledAt: e.target.value }))} /></div><Button onClick={sendAnnouncement}>Send announcement</Button></div><div className="surface divide-y divide-[var(--color-border)]">{announcements.length ? announcements.map((item) => <div key={item._id} className="p-4 text-sm"><p className="font-semibold">{item.body}</p><p className="mt-1 text-[var(--color-text-secondary)]">{item.sendTo} · {item.priority} · {new Date(item.createdAt).toLocaleString()}</p></div>) : <EmptyState title="No announcements yet" />}</div></div>}
 
-          {section === "Settings" && <div className="surface grid gap-4 p-5"><label className="flex justify-between gap-4 text-sm font-semibold">Require admin approval for new events <input type="checkbox" /></label><label className="flex justify-between gap-4 text-sm font-semibold">Allow users to create events <input type="checkbox" /></label><label className="flex justify-between gap-4 text-sm font-semibold">Require admin approval for gallery uploads <input type="checkbox" defaultChecked /></label><Input label="Birthday reminder days in advance" type="number" defaultValue="1" /><Button variant="danger">Clear all pending gallery items</Button></div>}
+          {section === "Settings" && <div className="surface grid gap-4 p-5"><label className="flex justify-between gap-4 text-sm font-semibold">Require admin approval for new events <input type="checkbox" checked={settings.requireEventApproval} onChange={(e) => setSettings((current) => ({ ...current, requireEventApproval: e.target.checked }))} /></label><label className="flex justify-between gap-4 text-sm font-semibold">Allow users to create events <input type="checkbox" checked={settings.allowUserEvents} onChange={(e) => setSettings((current) => ({ ...current, allowUserEvents: e.target.checked }))} /></label><label className="flex justify-between gap-4 text-sm font-semibold">Require admin approval for gallery uploads <input type="checkbox" checked={settings.requireGalleryApproval} onChange={(e) => setSettings((current) => ({ ...current, requireGalleryApproval: e.target.checked }))} /></label><Input label="Birthday reminder days in advance" type="number" value={settings.birthdayReminderDays} onChange={(e) => setSettings((current) => ({ ...current, birthdayReminderDays: Number(e.target.value) }))} /><Button onClick={() => updateAdminSettings(settings).then((data) => { setSettings((current) => ({ ...current, ...data })); toast("Settings saved.", "success"); }).catch((error) => toast(error.message || "Error occurred", "error"))}>Save settings</Button></div>}
         </div>
       </div>
       <ConfirmDialog open={Boolean(confirm)} title={confirm?.title || ""} description={confirm?.description || ""} dangerous onCancel={() => setConfirm(null)} onConfirm={() => confirm?.action().finally(() => setConfirm(null))} />
