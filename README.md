@@ -1,5 +1,6 @@
 # EventM
 
+The Backend Repo: https://github.com/aditi0057/EventM_Backend
 EventM is a full-stack event management platform for corporate teams. It helps employees discover upcoming celebrations, create events, vote in polls, share event photos, receive announcements, and manage birthday or work-anniversary calendars from one place.
 
 This repository contains the frontend application. The complete project also includes a separate backend API:
