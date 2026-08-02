@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContent';
 import Link from 'next/link';
@@ -16,7 +16,12 @@ export default function SignInPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const { login } = useAuth();
+  const { user, isLoading, login } = useAuth();
+
+  useEffect(() => {
+    if (isLoading || !user) return;
+    router.replace(user.role === 'admin' ? '/admin' : '/UserDashboard');
+  }, [isLoading, router, user]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -40,9 +45,9 @@ export default function SignInPage() {
 
       // Redirect based on user role
       if (result.data.user.role === 'admin') {
-        router.push('/admin');
+        router.replace('/admin');
       } else {
-        router.push('/UserDashboard');
+        router.replace('/UserDashboard');
       }
 
     } catch (err: any) {
